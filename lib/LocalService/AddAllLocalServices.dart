@@ -1,15 +1,18 @@
 import 'dart:convert';
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'dart:collection';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/constantTextField.dart';
+import 'package:residents/Constant/tokenGenerate.dart';
 import 'package:residents/ModelClass/MaidModel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
@@ -57,10 +60,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
   TextEditingController _documentTypeController = TextEditingController();
   TextEditingController _guardDutyTimingController = TextEditingController();
   TextEditingController _documentNumber = TextEditingController();
- // TextEditingController _type = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
 
-  AddDataToSociety()  {
+  AddDataToSociety(String photourl)  {
 
     AllService service = AllService(
       name: _guardNameController.text,
@@ -68,11 +71,12 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
       otherMobileNumber: _guardOtherMobileController.text,
       dutyTiming: _guardDutyTimingController.text,
       startDate: DateTime.now(),
-      photoUrl: global.photoUrl,
+      photoUrl: photourl,
       documentNumber: _documentNumber.text,
       documentType: _documentTypeController.text,
       enable: true,
       service: widget.serviceName,
+      password: _passwordController.text
 
     );
     Firestore.instance
@@ -80,7 +84,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
         .document(global.mainId)
         .collection(widget.serviceName)
         .document(_documentNumber.text)
-        .setData(jsonDecode(jsonEncode(service.toJson())));
+        .setData(jsonDecode(jsonEncode(service.toJson())),merge: true);
   }
 
 
@@ -91,7 +95,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
 
       });
       if(global.image != null){
-        AddDataToSociety();
+
         String fileName = widget.serviceName +'/${DateTime.now()}.png';
         StorageReference reference =
         FirebaseStorage.instance.ref().child(fileName);
@@ -102,6 +106,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
             storageTaskSnapshot = value;
             storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
               global.photoUrl = downloadUrl;
+              AddDataToSociety(global.photoUrl);
               AllService service = AllService(
                 name: _guardNameController.text,
                 mobileNumber: _guardMobileController.text,
@@ -117,7 +122,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
               Firestore.instance
                   .collection("LocalServices")
                   .document(_documentNumber.text)
-                  .setData(jsonDecode(jsonEncode(service.toJson())))
+                  .setData(jsonDecode(jsonEncode(service.toJson())),merge: true)
                   .then((data) {
                 History history = History(
                     Id: Uuid().v1(),
@@ -128,7 +133,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                     .document(_documentNumber.text)
                     .collection("records")
                     .document(history.Id)
-                    .setData(jsonDecode(jsonEncode(history.toJson())))
+                    .setData(jsonDecode(jsonEncode(history.toJson())),merge: true)
                     .then((value) => setState(() {
                   _showDialog();
                 }));
@@ -363,6 +368,13 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                       ),
                       GestureDetector(
                         onTap: () {
+
+                          int min = 1000;
+                          int max = 9999;
+                          var randomizer = new Random();
+                          var rNum = min + randomizer.nextInt(max - min);
+                          _passwordController.text = rNum.toString();
+
                           SaveInformation();
                         },
                         child: Row(
@@ -483,20 +495,36 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                 Text(
                  widget.serviceName + " is Added ",
                   style: TextStyle(color: UniversalVariables.background),
+                ),
+                Text(
+                "Password of" + widget.serviceName + ": "+ _passwordController.text,
+                  style: TextStyle(color: UniversalVariables.background),
                 )
               ],
             ),
           ),
           actions: <Widget>[
-            RaisedButton(
-              child: Text('ok'),
-              onPressed: () {
-                setState(() {
-                  isLoading = false;
-                });
-                Navigator.pop(context);
-              },
-            ),
+            GestureDetector(
+                onTap: () async {
+                  var response = await FlutterShareMe().shareToSystem(
+                      msg: global.RWATokenMsg + _passwordController.text);
+                  if (response == 'success') {}
+                  Navigator.pop(context);
+                },
+                child: Container(
+                    color: UniversalVariables.background,
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width,
+                    child: Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Icon(
+                        Icons.share,
+                        color: UniversalVariables.ScaffoldColor,
+                        size: 30,
+                      ),
+                    )))
           ],
         );
       },

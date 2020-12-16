@@ -9,3 +9,13 @@ String RandomString(int strlen) {
   }
   return result;
 }
+
+
+String RandomPassword(int strlen) {
+  Random rnd = new Random(new DateTime.now().millisecondsSinceEpoch);
+  String result = "";
+  for (var i = 0; i < strlen; i++) {
+    result += rnd.toString();
+  }
+  return result;
+}

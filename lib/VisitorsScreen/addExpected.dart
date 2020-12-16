@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,6 +14,7 @@ import 'package:residents/Constant/constantTextField.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
 import 'package:residents/Constant/globalsVariable.dart';
 import 'package:residents/Constant/tokenGenerate.dart';
+import 'package:residents/ModelClass/ActivationModel.dart';
 import 'package:residents/ModelClass/UserModel.dart';
 import 'package:residents/ModelClass/visitorModel.dart';
 import 'package:screenshot/screenshot.dart';
@@ -138,7 +140,10 @@ class _AddExpectedState extends State<AddExpected> {
   @override
   void initState() {
     _userData = context.bloc<AuthBloc>().getCurrentUser();
+    print(_userData.phoneNo);
+    print(_userData.gender);
     global.type = "Select Visitor ";
+    global.number = "0";
     global.mobileNumberController.clear();
     global.nameController.clear();
     super.initState();
@@ -242,7 +247,7 @@ class _AddExpectedState extends State<AddExpected> {
                                       onPressed: () {}),
                                   1,
                                   1,
-                                  TextInputType.number,
+                                  TextInputType.text,
                                   false),
                             ),
                             SizedBox(
@@ -475,7 +480,7 @@ class _AddExpectedState extends State<AddExpected> {
                       ],
                     ),
                   ),
-                  _imageFile != null ? Image.file(_imageFile) : Container(),
+
                   SizedBox(
                     height: 50,
                   ),
@@ -528,14 +533,15 @@ class _AddExpectedState extends State<AddExpected> {
             DateFormat(global.dateFormat).parse(_dateController.text),
             houseId: global.parentId,
             enable: true,
-            ownerHouse: null,
-            ownerMobileNumber: null,
-            ownerName: null,
+            ownerHouse: global.flatNo,
+            ownerMobileNumber: _userData.phoneNo,
+            ownerName: _userData.name,
             token: _tokenController.text,
             id: global.uuid,
             firstInviteTime: _firstTimeController.text,
             secondInviteTime: _secondTimeController.text,
             allDay: isAllDay,
+            inviteBye: _userData.name,
             societyId: global.mainId);
         Firestore.instance
             .collection(global.SOCIETY)
@@ -548,6 +554,13 @@ class _AddExpectedState extends State<AddExpected> {
         });
       }
     }
+  }
+
+  SaveActivationCode(){
+    ActivationCode activationCode = ActivationCode(
+
+
+    );
   }
 
   Future<void> _showDialog() async {

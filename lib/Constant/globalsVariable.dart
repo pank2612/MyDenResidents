@@ -47,7 +47,7 @@ String photoUrl = "";
 //ExpectedVisitor
 var type;
 var number;
-var guestNumber = [1,2,3,4,5];
+var guestNumber = [0,1,2,3,4,5];
 var guestType = ["Guest","NewsPaper","Friends"];
 
 // deliveryOrder

@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/ModelClass/UserModel.dart';
 import 'AddHouse.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 
@@ -26,8 +28,11 @@ class _HousesScreenState extends State<HousesScreen> {
   bool isLoading = false;
    DocumentSnapshot lastDocument = null;
 
+   UserData _userData = UserData();
+
   @override
   void initState() {
+    _userData = context.bloc<AuthBloc>().getCurrentUser();
     getHouseMembers();
     super.initState();
   }
@@ -79,31 +84,8 @@ class _HousesScreenState extends State<HousesScreen> {
                                 Text(
                                   userDataList[index].name,
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w800, fontSize: 20),
+                                      fontWeight: FontWeight.w800, fontSize: 13),
                                 ),
-                                RaisedButton(
-                                    shape:
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                            20)),
-
-                                    child: Padding(
-                                      padding:
-                                      EdgeInsets.all(5),
-                                      child: Text(
-                                        "Created By ",
-                                        // visitorsList[index]
-                                        //     .ownerName,
-                                        style: TextStyle(
-                                            color: UniversalVariables
-                                                .ScaffoldColor,
-                                            fontWeight:
-                                            FontWeight.w800,
-                                            fontSize: 15),
-                                      ),
-                                    ))
                               ],
                             ),
                             Divider(),

@@ -9,15 +9,16 @@ class AllService {
   String photoUrl;
   String dutyTiming;
   bool enable;
+  bool passwordEnable;
   String documentNumber;
   String documentType;
-
   String service;
+  String password;
 
 
 
   AllService({ this.name, this.mobileNumber, this.otherMobileNumber, this.startDate,
-    this.photoUrl, this.dutyTiming,this.enable,this.documentNumber,this.service,this.documentType});
+    this.photoUrl, this.dutyTiming,this.enable,this.documentNumber,this.service,this.documentType,this.passwordEnable,this.password});
 
   AllService.fromJson(Map<String, dynamic> json)
       :
@@ -30,6 +31,8 @@ class AllService {
         enable = json['enable'],
         documentNumber =  json['documentNumber'],
         service = json['service'],
+        password = json['password'],
+        passwordEnable = json['passwordEnable'],
         dutyTiming = json['dutyTiming'];
 
 
@@ -37,6 +40,8 @@ class AllService {
       {
 
         'name': name,
+        'password':password,
+        'passwordEnable':passwordEnable,
         'documentType':documentType,
         'service':service,
         'mobileNumber': mobileNumber,

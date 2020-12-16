@@ -7,7 +7,7 @@ import 'package:residents/validator.dart';
 enum validationKey {email, payment, Description, activationCode, date, venue,
   time, device, gateNo, entrance, ownerName, towerNumber, familyMember, documentType,
   adharCard,panCard,  gender, password,username,mobileNo,otherMobileNo,name,companyName,
-  society, flatNo,controller,option,confirmPassword,validDocumentType,amenity,societyCode,vehical}
+  society, flatNo,controller,option,confirmPassword,validDocumentType,amenity,societyCode,vehical,}
 
 class constantTextField {
 

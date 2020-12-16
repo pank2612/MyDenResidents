@@ -9,7 +9,7 @@ class UserData {
   String phoneNo;
 
   String gender;
-  String flatNo;
+  String token;
   String profilePhoto;
   List<AccessList> accessList;
   bool emailVerified;
@@ -21,7 +21,7 @@ class UserData {
     this.phoneNo,
 
     this.gender,
-    this.flatNo,
+    this.token,
     this.profilePhoto,
     this.accessList,
     this.emailVerified
@@ -34,7 +34,7 @@ class UserData {
     data['phoneNo'] = this.phoneNo;
 
     data["gender"] = this.gender;
-    data["url"] = this.flatNo;
+    data["token"] = this.token;
     data["photoUrl"] = this.profilePhoto;
     //final Map<String, dynamic> data = new Map<String, dynamic>();
     // if (this.accessList != null) {
@@ -49,7 +49,7 @@ class UserData {
     this.phoneNo = mapData['phoneNo'];
 
     this.gender = mapData['gender'];
-    this.flatNo = mapData['flatNo'];
+    this.token = mapData['token'];
     this.profilePhoto = mapData['photoUrl'];
     if(mapData['accessList']!=null) {
       List<AccessList> mainAccessList = List<AccessList>();
@@ -63,6 +63,7 @@ class UserData {
         accessList.societyName = mapData['accessList'][i]['societyName'];
         accessList.residentId = mapData['accessList'][i]['residentId'];
         accessList.flatNo = mapData['accessList'][i]['flatNo'];
+        accessList.token = mapData['accessList'][i]['token'];
         print(accessList);
         mainAccessList.add(accessList);
       }}
@@ -80,6 +81,7 @@ class AccessList{
   String societyName;
   String residentId;
   String flatNo;
+  String token;
 
   AccessList({
     this.id,
@@ -87,7 +89,8 @@ class AccessList{
     this.type,
     this.societyName,
     this.residentId,
-    this.flatNo
+    this.flatNo,
+    this.token,
   });
   Map toMap(AccessList obj) {
     var data = Map<String, dynamic>();
@@ -97,6 +100,7 @@ class AccessList{
     data['flatNo'] = obj.flatNo;
     data['societyName'] = obj.societyName;
     data['residentId'] = obj.residentId;
+    data['token'] = obj.token;
 
     return data;
   }
@@ -107,6 +111,7 @@ class AccessList{
     this.flatNo = mapData['flatNo'];
     this.societyName = mapData['societyName'];
     this.residentId = mapData['residentId'];
+    this.token = mapData['token'];
   }
 
 }

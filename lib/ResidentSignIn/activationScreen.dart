@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
 import 'package:residents/Bloc/AuthBloc.dart';
@@ -22,6 +23,7 @@ class ActivationScreen extends StatefulWidget {
 }
 
 class _ActivationScreenState extends State<ActivationScreen> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   TextEditingController _activationController = TextEditingController();
   TextEditingController _societyController = TextEditingController();
   UserData _userData = UserData();
@@ -152,7 +154,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
           .collection('ActivationCode')
           .where("tokenNo", isEqualTo: _activationController.text)
           .where("enable", isEqualTo: true)
-          .where("type", isEqualTo: "Residents")
+         // .where("type", isEqualTo: "Residents")
           .getDocuments()
           .then((value) {
         print(value.documents.length);
@@ -190,7 +192,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
   disableSocietyId(String societyEnable) {
     Firestore.instance
         .collection('ActivationCode')
-        .document(societyEnable)
+        .document()
         .updateData({"enable": false});
   }
   saveAccesList(QuerySnapshot accessList,) {
@@ -210,6 +212,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
         ),
       }, merge: true);
       saveFamilyMembers(element['iD']);
+      _tokenRegister();
     });
   }
 
@@ -229,4 +232,17 @@ class _ActivationScreenState extends State<ActivationScreen> {
         .document(_userData.uid)
         .setData(jsonDecode(jsonEncode(houseMember.toJson())));
   }
-}
+
+  _tokenRegister(){
+    UserData _userData = UserData();
+    _userData = context.bloc<AuthBloc>().getCurrentUser();
+    _firebaseMessaging.getToken().then((token) {
+      Firestore.instance.collection("users").document(_userData.uid).setData({
+        "token": token
+      }, merge: true);
+
+      });
+    }
+
+  }
+

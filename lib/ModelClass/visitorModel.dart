@@ -16,12 +16,16 @@ class Visitor {
   String societyId;
   String firstInviteTime;
   String secondInviteTime;
+  String deletName;
+  String inviteBye;
   bool allDay;
+  bool accept;
 
   Visitor(
       {this.houseId,
         this.allDay,
       this.name,
+        this.accept,
       this.mobileNumber,
       this.societyId,
       this.inviteDate,
@@ -34,6 +38,8 @@ class Visitor {
       this.ownerHouse,
       this.ownerMobileNumber,
       this.token,
+        this.inviteBye,
+        this.deletName,
       this.id});
 
   Visitor.fromJson(Map<String, dynamic> json)
@@ -41,6 +47,8 @@ class Visitor {
         name = json['name'],
         allDay = json['allDay'],
         id = json['id'],
+        accept = json['accept'],
+        inviteBye = json['inviteBye'],
         secondInviteTime = json['secondInviteTime'],
         firstInviteTime = json['firstInviteTime'],
         societyId = json["societyId"],
@@ -51,6 +59,7 @@ class Visitor {
         ownerName = json['ownerName'],
         enable = json['enable'],
         token = json['token'],
+        deletName = json['deletName'],
         ownerMobileNumber = json['ownerMobileNumber'],
         ownerHouse = json['ownerHouse'];
 
@@ -58,9 +67,12 @@ class Visitor {
         'houseId': houseId,
         'token': token,
         'allDay':allDay,
+        'accept':accept,
+        'deletName':deletName,
         'secondInviteTime': secondInviteTime,
         'firstInviteTime': firstInviteTime,
         'id': id,
+        'inviteBye':inviteBye,
         'name': name,
         'societyId': societyId,
         'ownerMobileNumber': ownerMobileNumber,

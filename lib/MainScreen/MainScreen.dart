@@ -15,7 +15,6 @@ import 'package:residents/ResidentSignIn/activationScreen.dart';
 import 'package:residents/VisitorsScreen/VisitorsMainScreen.dart';
 import 'package:residents/VrndorsScreen/VendorMainScreen.dart';
 import 'package:residents/pre_approve_delivery/allowOnceMainDelivery.dart';
-
 import '../main.dart';
 import '../try.dart';
 

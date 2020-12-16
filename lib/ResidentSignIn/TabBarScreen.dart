@@ -11,6 +11,9 @@ import 'package:residents/ActivityScreen/MainActivityScreen.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/MainScreen/MainScreen.dart';
+import 'package:residents/Settings/Settings.dart';
+
+import '../notification.dart';
 
 
 //SharedPreferences prefs;
@@ -26,7 +29,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
   int _page = 0;
   GlobalKey _bottomNavigationKey = GlobalKey();
   PageController pageController;
-  final pages = [MainScreen(),Activity(),MainScreen(),MainScreen(),MainScreen()];
+  final pages = [MainScreen(),Activity(),MainScreen(),PreapproveNotification(),notification()];
 
 
 

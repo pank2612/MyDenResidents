@@ -5,13 +5,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/globalsVariable.dart' as globals;
 import 'package:residents/ModelClass/HouseModel.dart';
+import 'package:residents/ModelClass/UserModel.dart';
 import 'package:residents/ModelClass/VendorsModel.dart';
 import 'package:residents/ModelClass/visitorModel.dart';
 
 import 'addExpected.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GetExpectedVisitors extends StatefulWidget {
   @override
@@ -21,6 +24,7 @@ class GetExpectedVisitors extends StatefulWidget {
 class _VendorsScreenState extends State<GetExpectedVisitors> {
   List<Visitor> visitorsList = List<Visitor>();
   List<House> houseList = List<House>();
+  UserData _userData = UserData();
 
   bool isLoading = false;
   bool hasMore = true;
@@ -30,8 +34,9 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
 
   @override
   void initState() {
+    super.initState();
     getExpectedVisitors(lastDocument);
-
+    _userData = context.bloc<AuthBloc>().getCurrentUser();
   }
 
   @override
@@ -82,11 +87,74 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            visitorsList[index].visitorType,
+                                            visitorsList[index].visitorType + " + " + visitorsList[index].visitorNumber,
                                             style: TextStyle(
                                                 fontWeight: FontWeight.w800,
                                                 fontSize: 15),
                                           ),
+                                          visitorsList[index].inviteBye == "Guard" && visitorsList[index].enable == true ?
+                                          Row(
+                                            children: [
+                                              InkWell(
+                                                onTap: () {
+                                                  _showAcceptDialog(
+                                                      visitorsList[index]);
+                                                },
+                                                child: Card(
+                                                    shape:
+                                                    RoundedRectangleBorder(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(
+                                                            20)),
+                                                    color: Colors.green,
+                                                    elevation: 10,
+                                                    child: Padding(
+                                                      padding:
+                                                      EdgeInsets.all(5),
+                                                      child: Text(
+                                                        "Accept Visitor",
+                                                        style: TextStyle(
+                                                            color: UniversalVariables
+                                                                .ScaffoldColor,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w800,
+                                                            fontSize: 12),
+                                                      ),
+                                                    )),
+                                              ),
+                                              InkWell(
+                                                onTap: () {
+                                                  _showDeletDialog(
+                                                      visitorsList[index]);
+                                                },
+                                                child: Card(
+                                                    shape:
+                                                    RoundedRectangleBorder(
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(
+                                                            20)),
+                                                    color: Colors.red[900],
+                                                    elevation: 10,
+                                                    child: Padding(
+                                                      padding:
+                                                      EdgeInsets.all(5),
+                                                      child: Text(
+                                                        "Cancel Visitor",
+                                                        style: TextStyle(
+                                                            color: UniversalVariables
+                                                                .ScaffoldColor,
+                                                            fontWeight:
+                                                            FontWeight
+                                                                .w800,
+                                                            fontSize: 12),
+                                                      ),
+                                                    )),
+                                              )
+                                            ],
+                                          ):
                                           visitorsList[index].enable == true
                                               ? InkWell(
                                                   onTap: () {
@@ -100,8 +168,7 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                                                   BorderRadius
                                                                       .circular(
                                                                           20)),
-                                                      color: UniversalVariables
-                                                          .background,
+                                                      color: Colors.red[900],
                                                       elevation: 10,
                                                       child: Padding(
                                                         padding:
@@ -118,7 +185,49 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                                         ),
                                                       )),
                                                 )
-                                              :Container()
+                                              : visitorsList[index].accept == true ?
+                                          Card(
+                                              color: Colors.grey,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      20)),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(5),
+                                                child: Text(
+                                                  "Accept By " +
+                                                      visitorsList[index]
+                                                          .deletName,
+                                                  style: TextStyle(
+                                                      color:
+                                                      UniversalVariables
+                                                          .ScaffoldColor,
+                                                      fontWeight:
+                                                      FontWeight.w800,
+                                                      fontSize: 12),
+                                                ),
+                                              )):
+                                          Card(
+                                              color: Colors.grey,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      20)),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(5),
+                                                child: Text(
+                                                  "Cancel By " +
+                                                      visitorsList[index]
+                                                          .deletName,
+                                                  style: TextStyle(
+                                                      color:
+                                                      UniversalVariables
+                                                          .ScaffoldColor,
+                                                      fontWeight:
+                                                      FontWeight.w800,
+                                                      fontSize: 12),
+                                                ),
+                                              ))
                                         ],
                                       ),
                                       Divider(
@@ -140,16 +249,23 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                                       padding:
                                                           EdgeInsets.all(5),
                                                       child: visitorsList[index]
-                                                                  .enable ==
+                                                                  .accept ==
                                                               true
                                                           ? Image.asset(
                                                               "images/done.png",
                                                               fit: BoxFit.cover,
                                                             )
-                                                          : Image.asset(
+                                                          :  visitorsList[index]
+                                                          .accept ==
+                                                          false
+                                                          ?
+                                                      Image.asset(
                                                               "images/cancel.png",
                                                               fit: BoxFit.cover,
-                                                            )))),
+                                                            ):Image.asset(
+                                                        "images/coming.png",
+                                                        fit: BoxFit.cover,
+                                                      )))),
                                           SizedBox(
                                             width: 10,
                                           ),
@@ -163,8 +279,7 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                                         .width /
                                                     1.5,
                                                 child: Text(
-                                                  visitorsList[index]
-                                                      .name,
+                                                  visitorsList[index].name,
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w800),
@@ -177,47 +292,48 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                                 visitorsList[index]
                                                     .mobileNumber,
                                               ),
-                                              Row(
-                                                children: [
-                                                  Text('Coming at: '),
-                                                  visitorsList[index].allDay ==
-                                                          false
-                                                      ? Row(
-                                                          children: [
-                                                            Text(
-                                                              visitorsList[
-                                                                      index]
-                                                                  .firstInviteTime,
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w800),
-                                                            ),
-                                                            Text(' to ',
+                                              visitorsList[index].allDay == null
+                                                  ? Text(
+                                                      'Your visitor is At Gate')
+                                                  : Row(
+                                                      children: [
+                                                        Text('Coming at: '),
+                                                        visitorsList[index]
+                                                                    .allDay ==
+                                                                false
+                                                            ? Row(
+                                                                children: [
+                                                                  Text(
+                                                                    visitorsList[
+                                                                            index]
+                                                                        .firstInviteTime,
+                                                                    style: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w800),
+                                                                  ),
+                                                                  Text(' to ',
+                                                                      style: TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.w800)),
+                                                                  Text(
+                                                                    visitorsList[
+                                                                            index]
+                                                                        .secondInviteTime,
+                                                                    style: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.w800),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            : Text(
+                                                                " Any Time",
                                                                 style: TextStyle(
                                                                     fontWeight:
                                                                         FontWeight
-                                                                            .w800)),
-                                                            Text(
-                                                              visitorsList[
-                                                                      index]
-                                                                  .secondInviteTime,
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w800),
-                                                            ),
-                                                          ],
-                                                        )
-                                                      : Text(
-                                                          " Any Time",
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w800),
-                                                        )
-                                                ],
-                                              ),
+                                                                            .w800),
+                                                              )
+                                                      ],
+                                                    ),
                                               Text(
                                                 DateFormat(globals.dateFormat)
                                                     .format(visitorsList[index]
@@ -231,38 +347,52 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                         ],
                                       ),
                                       // Divider(
-                                      //   color: Colors.black,
+                                       //   color: Colors.black,
                                       // ),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          visitorsList[index].enable == true
-                                              ? Container()
-                                              : Card(
-                                            color: Colors.grey,
+
+                                      visitorsList[index].inviteBye == "Guard"
+                                          ? Card(
+                                              color: Colors.grey,
                                               shape: RoundedRectangleBorder(
                                                   borderRadius:
-                                                  BorderRadius
-                                                      .circular(
-                                                      20)),
-
+                                                      BorderRadius.circular(
+                                                          20)),
                                               child: Padding(
-                                                padding:
-                                                EdgeInsets.all(5),
+                                                padding: EdgeInsets.all(5),
                                                 child: Text(
-                                                  "Cancel By " +
-                                                      visitorsList[index]
-                                                          .ownerName,
+                                                    "Without Invitation",
+                                                    style: TextStyle(
+                                                        color:
+                                                            UniversalVariables
+                                                                .ScaffoldColor,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        fontSize: 12)),
+                                              ))
+                                          :
+                                          Card(
+                                              color: Colors.grey,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      20)),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(5),
+                                                child: Text(
+                                                  "Invite By " +
+                                                      visitorsList[
+                                                      index]
+                                                          .inviteBye,
                                                   style: TextStyle(
                                                       color: UniversalVariables
                                                           .ScaffoldColor,
                                                       fontWeight:
-                                                      FontWeight.w800,
+                                                      FontWeight
+                                                          .w800,
                                                       fontSize: 12),
                                                 ),
                                               ))
-                                        ],
-                                      )
+
                                     ],
                                   )),
                             ));
@@ -289,15 +419,17 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
         floatingActionButton: FloatingActionButton(
           backgroundColor: UniversalVariables.background,
           onPressed: () {
-           // Navigator.push(context, MaterialPageRoute(builder: (context)=>AddExpected()));
+            // Navigator.push(context, MaterialPageRoute(builder: (context)=>AddExpected()));
             navigateSecondPage();
           },
           child: Icon(Icons.add),
         ));
   }
 
-  getExpectedVisitors(DocumentSnapshot _lastDocument, ) async {
-   // print(houseId);
+  getExpectedVisitors(
+    DocumentSnapshot _lastDocument,
+  ) async {
+    // print(houseId);
     print("jkjbk");
     if (!hasMore) {
       print('No More Data');
@@ -317,8 +449,10 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
           .document(globals.mainId)
           .collection(globals.VISITORS)
           .where('houseId', isEqualTo: globals.parentId)
-          .where("inviteDate",isGreaterThanOrEqualTo:  DateTime.now().subtract(Duration(days: 1)).toIso8601String())
-          .orderBy("inviteDate", descending: false)
+          .where("inviteDate",
+              isGreaterThanOrEqualTo:
+                  DateTime.now().subtract(Duration(days: 1)).toIso8601String())
+          .orderBy("inviteDate", descending: true)
           .limit(documentLimit)
           .getDocuments();
     } else {
@@ -327,8 +461,10 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
           .document(globals.mainId)
           .collection(globals.VISITORS)
           .where('houseId', isEqualTo: globals.parentId)
-          .where("inviteDate",isGreaterThanOrEqualTo:  DateTime.now().subtract(Duration(days: 1)).toIso8601String())
-          .orderBy("inviteDate", descending: false)
+          .where("inviteDate",
+              isGreaterThanOrEqualTo:
+                  DateTime.now().subtract(Duration(days: 1)).toIso8601String())
+          .orderBy("inviteDate", descending: true)
           .startAfterDocument(_lastDocument)
           .limit(documentLimit)
           .getDocuments();
@@ -354,8 +490,7 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
   }
 
 
-
-  Future<void> _showDeletDialog(Visitor visitor) async {
+  Future<void> _showAcceptDialog(Visitor visitor) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -365,7 +500,7 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
             child: ListBody(
               children: <Widget>[
                 Text(
-                  "Are You sure want to Delete this Visitors Entry",
+                  "Are You sure want to  Accept this Visitors Entry",
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
                 )
               ],
@@ -388,10 +523,76 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
               child: Text('Yes'),
               onPressed: () {
                 setState(() {
+                  acceptVisitors(visitor);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+
+  acceptVisitors(Visitor visitor) async {
+    await Firestore.instance
+        .collection(globals.SOCIETY)
+        .document(globals.mainId)
+        .collection(globals.VISITORS)
+        .document(visitor.id)
+        .setData({
+      "accept": true,
+      "enable": false,
+      "deletName": _userData.name},
+        merge: true).then((data) async {
+      setState(() {
+        isLoading = false;
+      });
+      getExpectedVisitors(null);
+
+      Fluttertoast.showToast(msg: "Accept successfully");
+      Navigator.pop(context);
+    }).then(onGoBack);
+  }
+
+
+
+
+  Future<void> _showDeletDialog(Visitor visitor) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  "Are You sure want to  Delete this Visitors Entry",
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              color: UniversalVariables.background,
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            RaisedButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              color: UniversalVariables.background,
+              child: Text('Yes'),
+              onPressed: () {
+                setState(() {
                   deleteVisitors(visitor);
                 });
-
               },
             ),
           ],
@@ -406,32 +607,27 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
         .document(globals.mainId)
         .collection(globals.VISITORS)
         .document(visitor.id)
-        .updateData({
+        .setData({
+      "accept": false,
       "enable": false,
-    }).then((data) async {
+      "deletName": _userData.name},
+            merge: true).then((data) async {
       setState(() {
         isLoading = false;
       });
       getExpectedVisitors(null);
 
-
-
       Fluttertoast.showToast(msg: "Delete successfully");
       Navigator.pop(context);
     }).then(onGoBack);
-
-    // catchError((err) {
-    //   setState(() {
-    //     isLoading = false;
-    //   });
-    //   Fluttertoast.showToast(msg: err.toString());
-    // });
   }
+
+
+
 
   FutureOr onGoBack(dynamic value) {
     hasMore = true;
     getExpectedVisitors(null);
-
   }
 
   void navigateSecondPage() {

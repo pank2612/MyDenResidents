@@ -33,7 +33,7 @@ class _FullDetailsState extends State<FullDetails> {
 
   @override
   void initState() {
-    getVendorDetails(lastDocument);
+
     getSocietyrServices(lastDocument);
   }
 
@@ -44,7 +44,7 @@ class _FullDetailsState extends State<FullDetails> {
       double currentScroll = _scrollController.position.pixels;
       double delta = MediaQuery.of(context).size.height * 0.20;
       if (maxScroll - currentScroll <= delta) {
-        getVendorDetails(lastDocument);
+        getSocietyrServices(lastDocument);
       }
     });
     return Scaffold(
@@ -54,30 +54,8 @@ class _FullDetailsState extends State<FullDetails> {
       ),
       body: Stack(children: [
         Column(children: [
-          serviceList.length == 0 ?
-              Container():
-          Padding(
-            padding: EdgeInsets.only(right: 25),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Checkbox(
-                  activeColor: UniversalVariables.background,
-                  value: showInsideService,
-                  onChanged: (value) {
-                    setState(() {
-                      serviceList.clear();
-                      showInsideService = value;
-                      print(showInsideService);
-                    });
-                    getSocietyrServices(null);
-                  },
-                ),
-                Text("Inside"),
-              ],
-            ),
-          ),
-          //  SizedBox(height: 10,),
+
+            SizedBox(height: 10,),
           Padding(
             padding: const EdgeInsets.only(left: 15, right: 15),
           ),
@@ -86,113 +64,140 @@ class _FullDetailsState extends State<FullDetails> {
           Expanded(
             child: serviceList.length == 0
                 ? Center(
-                    child: Text(
-                    "No " + widget.serviceName + " have yet",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 20,
-                        color: UniversalVariables.background),
-                  ))
+                child: Text(
+                  "No " + widget.serviceName + " have yet",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                      color: UniversalVariables.background),
+                ))
                 : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: serviceList.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                          padding: const EdgeInsets.only(left: 15, right: 15),
-                          child: GestureDetector(
-                            onTap: (){
-                              Route route = CupertinoPageRoute(builder: (context) =>ShowFullDetails(
-                                allService: serviceList[index],
-                              ));
-                              Navigator.push(context, route).then(onGoBack);
-                            },
-                          child:
-                          Card(
-                            elevation: 10,
-                            child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.black54),
+              controller: _scrollController,
+              itemCount: serviceList.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    child: GestureDetector(
+                        onTap: () {
+                          // Route route = CupertinoPageRoute(builder: (context) =>ShowFullDetails(
+                          //   allService: serviceList[index],
+                          // ));
+                          // Navigator.push(context, route).then(onGoBack);
+                        },
+                        child: Card(
+                          elevation: 10,
+                          child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.black54),
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                                50)),
+                                        child: Container(
+                                            height: 70,
+                                            width: 70,
+                                            child: ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(50)),
-                                          child: Container(
-                                              height: 70,
-                                              width: 70,
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50),
-                                                child: CachedNetworkImage(
-                                                  placeholder: (context, url) =>
-                                                      Container(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation<
-                                                                  Color>(
-                                                              UniversalVariables
-                                                                  .background),
+                                              BorderRadius.circular(
+                                                  50),
+                                              child: CachedNetworkImage(
+                                                placeholder:
+                                                    (context, url) =>
+                                                    Container(
+                                                      child:
+                                                      CircularProgressIndicator(
+                                                        valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                            Color>(
+                                                            UniversalVariables
+                                                                .background),
+                                                      ),
+                                                      width: 50.0,
+                                                      height: 50.0,
                                                     ),
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                  ),
-                                                  imageUrl: serviceList[index]
-                                                      .photoUrl,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              )),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Text(
-                                                  serviceList[index].name,
-                                                  style: TextStyle(
-                                                      fontSize: 17,
-                                                      fontWeight:
-                                                          FontWeight.w800),
-                                                ),
-                                                Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 18,
-                                                )
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.star,
-                                                  color: Colors.yellow,
-                                                ),
-                                                Text("5.0")
-                                              ],
-                                            )
-                                          ],
+                                                imageUrl:
+                                                serviceList[index]
+                                                    .photoUrl,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )),
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                serviceList[index].name,
+                                                style: TextStyle(
+                                                    fontSize: 17,
+                                                    fontWeight:
+                                                    FontWeight.w800),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 18,
+                                              )
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.yellow,
+                                              ),
+                                              Text("5.0")
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      Spacer(),
+                                      CircleAvatar(
+                                        backgroundColor:
+                                        UniversalVariables.background,
+                                        minRadius: 30,
+                                        child: serviceList[index]
+                                            .passwordEnable ==
+                                            true
+                                            ? Text(
+                                          "IN",
+                                          style: TextStyle(
+                                              fontWeight:
+                                              FontWeight.w800,
+                                              fontSize: 30,
+                                              color: Colors.green),
                                         )
-                                      ],
-                                    )
-                                  ],
-                                )),
-                          ))
-
-                      );
-                    },
-                  ),
+                                            : Text(
+                                          "Out",
+                                          style: TextStyle(
+                                              fontWeight:
+                                              FontWeight.w800,
+                                              fontSize: 25,
+                                              color: Colors.green),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )),
+                        )));
+              },
+            ),
           ),
           isLoading
               ? Container(
@@ -213,7 +218,11 @@ class _FullDetailsState extends State<FullDetails> {
 
         ]),
       ]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton:
+      widget.serviceName == "Vendors" ? Container():
+
+
+      FloatingActionButton.extended(
         backgroundColor: UniversalVariables.background,
         onPressed: () {
          navigateSecondPage();
@@ -224,53 +233,7 @@ class _FullDetailsState extends State<FullDetails> {
     );
   }
 
-  getVendorDetails(DocumentSnapshot _lastDocument) async {
-    if (!hasMore) {
-      return;
-    }
-    if (isLoading) {
-      return;
-    }
-    setState(() {
-      isLoading = true;
-    });
 
-    QuerySnapshot querySnapshot;
-    if (_lastDocument == null) {
-      serviceList.clear();
-      querySnapshot = await Firestore.instance
-          .collection('LocalServices')
-          .where("service", isEqualTo: widget.serviceName)
-          .where('enable', isEqualTo: true)
-          .limit(documentLimit)
-          .getDocuments();
-    } else {
-      querySnapshot = await Firestore.instance
-          .collection('LocalServices')
-          .where("service", isEqualTo: widget.serviceName)
-          .where('enable', isEqualTo: true)
-          .startAfterDocument(_lastDocument)
-          .limit(documentLimit)
-          .getDocuments();
-    }
-    if (querySnapshot.documents.length < documentLimit) {
-      hasMore = false;
-    }
-    if (querySnapshot.documents.length != 0) {
-      lastDocument =
-          querySnapshot.documents[querySnapshot.documents.length - 1];
-      setState(() {
-        querySnapshot.documents.forEach((element) {
-          var service = AllService();
-          service = AllService.fromJson(element.data);
-          serviceList.add(service);
-        });
-      });
-    }
-    setState(() {
-      isLoading = false;
-    });
-  }
 
   getSocietyrServices(DocumentSnapshot _lastDocument) async {
     if (!hasMore) {
@@ -329,7 +292,7 @@ class _FullDetailsState extends State<FullDetails> {
 
   FutureOr onGoBack(dynamic value) {
     hasMore = true;
-    getVendorDetails(null);
+    getSocietyrServices(null);
     setState(() {});
   }
 
