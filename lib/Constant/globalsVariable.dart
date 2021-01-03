@@ -8,6 +8,10 @@ import 'package:residents/Constant/constantTextField.dart';
 //app
 const String appName = 'MyDen';
 const appType = "Residents";
+
+var notificationKey =
+    "key=AAAA7benEuU:APA91bE4pXVdtbXFYWyutC-cCxY76Gt30jDyR0og8iX8f6Jkbo0GLdc95kNusJrXjxPsVOvYsmaY4q7FbP2CH7lqWZtcUKJzUL5rA1oekx1WCo6IEoym4RcSELEt3y0LkiFciAQyvn3y";
+
 //
 TextEditingController companycontroller = TextEditingController();
 TextEditingController companyImagecontroller = TextEditingController();

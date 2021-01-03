@@ -1,167 +1,48 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
-import 'package:residents/LocalService/AddAllLocalServices.dart';
-import 'package:residents/LocalService/ServiceFullDetails.dart';
-import 'package:residents/LocalService/houseServices.dart';
-import 'package:residents/ModelClass/MaidModel.dart';
 import 'package:residents/Constant/globalsVariable.dart' as globals;
+import 'package:residents/ModelClass/MaidModel.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:residents/ModelClass/UserModel.dart';
 
-class FullDetails extends StatefulWidget {
-  final serviceName;
+import 'ServiceFullDetails.dart';
+class HouseServices extends StatefulWidget {
+  final houseService;
 
-  const FullDetails({Key key, this.serviceName}) : super(key: key);
-
+  const HouseServices({Key key, this.houseService}) : super(key: key);
   @override
-  _FullDetailsState createState() => _FullDetailsState();
+  _HouseServicesState createState() => _HouseServicesState();
 }
 
-class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderStateMixin {
+class _HouseServicesState extends State<HouseServices> {
   List<AllService> serviceList = List<AllService>();
-  TabController _tabController;
-  bool showInsideService = false;
-  bool changeSociety = false;
+
 
   bool isLoading = false;
-  bool hasMore = true;
-  int documentLimit = 15;
-  DocumentSnapshot lastDocument = null;
-  ScrollController _scrollController = ScrollController();
+
+
+
 
   @override
   void initState() {
 
     super.initState();
-    _tabController = new TabController(length: 2, vsync: this);
-    getSocietyrServices(lastDocument);
-  }
 
+    gethouseService();
+   // getSocietyrServices(lastDocument);
+  }
   @override
   Widget build(BuildContext context) {
-    _scrollController.addListener(() {
-      double maxScroll = _scrollController.position.maxScrollExtent;
-      double currentScroll = _scrollController.position.pixels;
-      double delta = MediaQuery.of(context).size.height * 0.20;
-      if (maxScroll - currentScroll <= delta) {
-        getSocietyrServices(lastDocument);
-      }
-    });
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: UniversalVariables.background,
-        title: Text(widget.serviceName),
-        bottom: TabBar(
-          unselectedLabelColor: Colors.white,
-          labelColor: Colors.amber,
-          tabs: [
-            Tab(
-              child: Text(
-                "Your " + widget.serviceName,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Tab(
-              child: Text(
-                "Society " + widget.serviceName,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-          ],
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorSize: TabBarIndicatorSize.tab,
-        ),
-        bottomOpacity: 1,
-      ),
-      body: TabBarView(
-        children: [HouseServices(houseService: widget.serviceName,), _society()],
-        controller: _tabController,
-      ),
-      floatingActionButton:
-      widget.serviceName == "Vendors" ? Container():
-
-
-      FloatingActionButton.extended(
-        backgroundColor: UniversalVariables.background,
-        onPressed: () {
-         navigateSecondPage();
-        },
-        icon: Icon(Icons.add),
-        label: Text("Add " + widget.serviceName),
-      ),
-    );
-  }
-
-
-
-  getSocietyrServices(DocumentSnapshot _lastDocument) async {
-    if (!hasMore) {
-      return;
-    }
-    if (isLoading) {
-      return;
-    }
-    setState(() {
-      isLoading = true;
-    });
-
-    QuerySnapshot querySnapshot;
-    if (_lastDocument == null) {
-      serviceList.clear();
-      querySnapshot = await Firestore.instance
-          .collection(globals.SOCIETY)
-          .document(globals.mainId)
-           .collection(widget.serviceName)
-          .where("service", isEqualTo: widget.serviceName)
-          .where('enable', isEqualTo: true)
-          .limit(documentLimit)
-          .getDocuments();
-    } else {
-      querySnapshot = await Firestore.instance
-          .collection(globals.SOCIETY)
-          .document(globals.mainId)
-          .collection(widget.serviceName)
-          .where("service", isEqualTo: widget.serviceName)
-          .where('enable', isEqualTo: true)
-          .startAfterDocument(_lastDocument)
-          .limit(documentLimit)
-          .getDocuments();
-    }
-    if (querySnapshot.documents.length < documentLimit) {
-      hasMore = false;
-    }
-    if (querySnapshot.documents.length != 0) {
-      lastDocument =
-      querySnapshot.documents[querySnapshot.documents.length - 1];
-      setState(() {
-        querySnapshot.documents.forEach((element) {
-          var service = AllService();
-          service = AllService.fromJson(element.data);
-          serviceList.add(service);
-        });
-      });
-    }
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-Widget _society(){
-  _scrollController.addListener(() {
-    double maxScroll = _scrollController.position.maxScrollExtent;
-    double currentScroll = _scrollController.position.pixels;
-    double delta = MediaQuery.of(context).size.height * 0.20;
-    if (maxScroll - currentScroll <= delta) {
-      getSocietyrServices(lastDocument);
-    }
-  });
-    return Scaffold(
-
-      body: Stack(children: [
+      body:Stack(children: [
         Column(children: [
 
           SizedBox(height: 10,),
@@ -174,14 +55,14 @@ Widget _society(){
             child: serviceList.length == 0
                 ? Center(
                 child: Text(
-                  "No " + widget.serviceName + " have yet",
+                  "No " + widget.houseService + " have yet",
                   style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 20,
                       color: UniversalVariables.background),
                 ))
                 : ListView.builder(
-              controller: _scrollController,
+             // controller: _scrollController,
               itemCount: serviceList.length,
               itemBuilder: (context, index) {
                 return Padding(
@@ -327,21 +208,50 @@ Widget _society(){
 
         ]),
       ]),
-
     );
-}
-
-
-  FutureOr onGoBack(dynamic value) {
-    hasMore = true;
-    getSocietyrServices(null);
-    setState(() {});
   }
 
-  void navigateSecondPage() {
-    Route route = CupertinoPageRoute(builder: (context) => AddAllLocalService(
-      serviceName: widget.serviceName,
-    ));
-    Navigator.push(context, route).then(onGoBack);
+  gethouseService()  {
+
+    QuerySnapshot querySnapshot;
+    DocumentSnapshot lastDocument = null;
+    Firestore.instance.collection(globals.SOCIETY)
+        .document(globals.mainId)
+        .collection("HouseDevices")
+        .where("houseId",isEqualTo: globals.parentId)
+        .getDocuments().then((value) async {
+         print(value.documents[0]["Maid"]);
+         print(globals.parentId);
+         serviceList.clear();
+         querySnapshot = await Firestore.instance
+             .collection(globals.SOCIETY)
+             .document(globals.mainId)
+             .collection(widget.houseService)
+            // .where("service", isEqualTo: widget.houseService)
+             .where("documentNumber", isEqualTo: value.documents[0]["Maid"])
+             .where('enable', isEqualTo: true)
+            // .where("houseId",isEqualTo: globals.parentId)
+             .getDocuments();
+         if (querySnapshot.documents.length != 0) {
+           lastDocument =
+           querySnapshot.documents[querySnapshot.documents.length - 1];
+
+           setState(() {
+             querySnapshot.documents.forEach((element) {
+               var service = AllService();
+               service = AllService.fromJson(element.data);
+               serviceList.add(service);
+             });
+           });
+         }
+
+
+    });
+  }
+
+  FutureOr onGoBack(dynamic value) {
+    // hasMore = true;
+    gethouseService();
+    setState(() {});
   }
 }

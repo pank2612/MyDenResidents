@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +10,7 @@ import 'package:residents/Constant/globalsVariable.dart' as globals;
 import 'package:residents/Constant/sharedPref.dart';
 
 import 'TabBarScreen.dart';
+import 'package:residents/Constant/globalsVariable.dart' as global;
 
 
 class accessList extends StatefulWidget {
@@ -55,6 +58,7 @@ class _accessListState extends State<accessList> {
                                   state.userData.accessList[index].residentId.toString());
                               savelocalCode().toSaveStringValue(residentId,
                                   state.userData.accessList[index].id.toString());
+                              _tokenRegister(state.userData.uid,state.userData.accessList[index].id.toString(), state.userData.accessList[index].residentId.toString());
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -86,5 +90,21 @@ class _accessListState extends State<accessList> {
         )
 
     );
+  }
+
+  _tokenRegister(String uid,String societyId,String parentId) {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.getToken().then((token) {
+      print(token);
+      Firestore.instance.collection(global.SOCIETY).document(societyId)
+          .collection("HouseDevices").document(uid)
+          .setData({
+        "enable":true,
+        "token": token,
+        "houseId":global.parentId
+      },merge: true);
+
+
+    });
   }
 }

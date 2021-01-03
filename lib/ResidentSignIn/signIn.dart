@@ -1,5 +1,6 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +14,7 @@ import 'package:residents/ResidentSignIn/TabBarScreen.dart';
 import 'package:residents/ResidentSignIn/accessListScreen.dart';
 import 'package:residents/ResidentSignIn/activationScreen.dart';
 import 'package:residents/ResidentSignIn/signUp.dart';
+import 'package:residents/Constant/globalsVariable.dart' as global;
 
 
 class LoginPage extends StatefulWidget {
@@ -29,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     ));
   }
 
-  UserData _userData = UserData();
+
 
 
   TextEditingController _passwordController = TextEditingController();
@@ -63,8 +65,8 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Widget _submitButton(
-      TextEditingController email, TextEditingController password) {
+  Widget _submitButton(TextEditingController email,
+      TextEditingController password) {
     return GestureDetector(
       onTap: () {
         if (formKey.currentState.validate()) {
@@ -331,7 +333,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery
+        .of(context)
+        .size
+        .height;
     return Scaffold(
         key: _scaffoldKey,
         body: Container(
@@ -398,7 +403,9 @@ class _LoginPageState extends State<LoginPage> {
                                             ? Icons.visibility
                                             : Icons.visibility_off,
                                         color:
-                                        Theme.of(context).primaryColorDark,
+                                        Theme
+                                            .of(context)
+                                            .primaryColorDark,
                                       ),
                                       onPressed: () {
                                         // Update the state i.e. toogle the state of passwordVisible variable
@@ -433,6 +440,9 @@ class _LoginPageState extends State<LoginPage> {
                           _divider(),
                           _facebookButton(),
                           _googleButton(),
+                          // FlatButton(onPressed: () => _tokenRegister(),
+                          //     child: Text("gfhh")),
+
                           SizedBox(
                             height: 5,
                           ),
@@ -460,10 +470,18 @@ class _LoginPageState extends State<LoginPage> {
 
   void googleLogin() {
     context.bloc<AuthBloc>().signInWithGoogle().then((value) {
-      _userData = context.bloc<AuthBloc>().getCurrentUser();
 
-      if (_userData.accessList != null) {
-        if (_userData.accessList.length == 1) {
+
+
+
+      if (value.accessList != null) {
+        if (value.accessList.length == 1) {
+          var socityId = value.accessList[0].id;
+          var parentId = value.accessList[0].residentId;
+          global.mainId = value.accessList[0].id;
+          global.parentId = value.accessList[0].residentId;
+          global.flatNo = value.accessList[0].flatNo;
+          _tokenRegister(value.uid,socityId,parentId);
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) {
                 return TabBarScreen();
@@ -473,15 +491,39 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) {
                 return accessList();
-             }));
+              }));
         }
       } else {
+        print("qqqqwwqwqw");
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
               return ActivationScreen();
-           }));
+            }));
       }
-    });}
+    });
+  }
+
+
+  _tokenRegister(String uid,String societyId,String parentId) {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    _firebaseMessaging.getToken().then((token) {
+      print(token);
+      Firestore.instance.collection("users").document(uid).setData({
+        "token": token
+      }, merge: true);
+        saveTokenTosociety(token,uid,societyId,parentId);
+    });
+  }
+
+  saveTokenTosociety(String token,String uid,String societyId,String parentId) {
+    Firestore.instance.collection(global.SOCIETY).document(societyId)
+        .collection("HouseDevices").document(uid)
+        .setData({
+       "enable":true,
+       "token": token,
+       "houseId":parentId
+    },merge: true);
+  }
 
 }
 

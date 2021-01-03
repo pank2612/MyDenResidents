@@ -24,6 +24,7 @@ class AddFrequentlyAll extends StatefulWidget {
 }
 
 class _AddFrequentlyAllState extends State<AddFrequentlyAll> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
    TextEditingController _firstTimeController = TextEditingController();
    TextEditingController _secondTimeController = TextEditingController();
    TextEditingController _vehicalNumberController = TextEditingController();
@@ -46,6 +47,7 @@ class _AddFrequentlyAllState extends State<AddFrequentlyAll> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: UniversalVariables.background,
         title: Text("AddFrequently"),
@@ -378,19 +380,30 @@ class _AddFrequentlyAllState extends State<AddFrequentlyAll> {
               children: [
                 Text("Select Days"),
                 SizedBox(height: 5,),
-                Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)
-                    ),
-                    elevation: 10,
-                    child: Padding(
-                      padding: EdgeInsets.all(5),
-                      child: Text(
-                        "All Days",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800, fontSize: 15),
-                      ),
-                    )),
+               GestureDetector(
+                 onTap: (){
+                   setState(() {
+                     global.selectDayList = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+                   });
+                   Navigator.pop(context);
+                 },
+                 child:  Card(
+                     shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(5)
+                     ),
+                     elevation: 10,
+                     child: Padding(
+                       padding: EdgeInsets.all(5),
+                       child: Text(
+                         "All Days",
+                         style: TextStyle(
+                             fontWeight: FontWeight.w800, fontSize: 15),
+                       ),
+                     )),
+
+
+
+               ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -476,6 +489,8 @@ class _AddFrequentlyAllState extends State<AddFrequentlyAll> {
       });
 
       if (global.selectDayList.contains('Select Days') || data == "" ) {
+        showScaffold("Plz Select Days and validity");
+
 
       } else {
 
@@ -499,7 +514,20 @@ class _AddFrequentlyAllState extends State<AddFrequentlyAll> {
           allowFrequentlyModel.id)
           .setData(jsonDecode(jsonEncode(allowFrequentlyModel.toJson())));
       Fluttertoast.showToast(msg: "Delivery added successful");
+      global.companycontroller.clear();
+      global.companyImagecontroller.clear();
+      _firstTimeController.clear();
+      _secondTimeController.clear();
+      global.selectDayList = [];
+      data = "";
+
     }
     }
   }
+
+   void showScaffold(String message) {
+     _scaffoldKey.currentState.showSnackBar(SnackBar(
+       content: Text(message),
+     ));
+   }
 }

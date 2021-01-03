@@ -85,13 +85,13 @@ class SettingsScreenState extends State<Visitors>
             tabs: [
               Tab(
                 child: Text(
-                  "Historical",
+                  "Expected",
                   style: TextStyle(fontSize: 20),
                 ),
               ),
               Tab(
                 child: Text(
-                  "Expected",
+                  "Historical",
                   style: TextStyle(fontSize: 20),
                 ),
               ),
@@ -104,8 +104,9 @@ class SettingsScreenState extends State<Visitors>
         ),
         body: TabBarView(
           children: [
-            visitorHistory(),
+
             GetExpectedVisitors(),
+            visitorHistory(),
           ],
           controller: _tabController,
         ));

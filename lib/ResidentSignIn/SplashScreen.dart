@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,9 +13,11 @@ import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/sharedPref.dart';
 import 'package:residents/ModelClass/UserModel.dart';
 import 'package:residents/ResidentSignIn/signIn.dart';
+import 'package:residents/VisitorsScreen/GetExpectedVisitors.dart';
 
 import 'TabBarScreen.dart';
 import 'accessListScreen.dart';
+import 'activationScreen.dart';
 import 'emailVerification.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -30,6 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
 
+
   Future<UserData> _getUserData() async {
     print("getUserData -----------------");
     return await context.bloc<AuthBloc>().currentUser();
@@ -41,7 +45,6 @@ class _SplashScreenState extends State<SplashScreen> {
     _getUserData().then((fUser) {
       if(fUser!=null) {
         print("fuser length");
-      //  print(fUser.accessList.length);
         if(!fUser.emailVerified){
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) => EmailVerification()));
@@ -54,29 +57,14 @@ class _SplashScreenState extends State<SplashScreen> {
               context, MaterialPageRoute(builder: (context) => TabBarScreen()));
         }
         else if ( fUser.accessList != null && fUser.accessList.length > 1){
-          //shared Pref
-          savelocalCode().toGetDate(residentId).then((value){
-            print(value);
-            if(value!=null)
-            {
-              global.mainId = value;
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (context) => accessList()));
-            }
-            else
-            {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => accessList()));
-            }
-
-          });
         }
+
         else {
-         global.mainId = fUser.accessList[0].id.toString();
-         global.parentId = fUser.accessList[0].residentId.toString();
-         global.flatNo = fUser.accessList[0].flatNo.toString();
+
           Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => TabBarScreen()));
+              MaterialPageRoute(builder: (context) => ActivationScreen()));
         }
       }
       else {
@@ -84,7 +72,14 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginPage()));
       }
     });
+
+
+
   }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +119,35 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
 
-
+   _showDialog()  {
+    return showDialog(
+      context: context,
+    //  barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text('AlertDialog Title'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  "Your Activation Code Is Wrong ",
+                  style: TextStyle(color: UniversalVariables.background),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              child: Text('ok'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
 }

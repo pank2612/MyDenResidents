@@ -16,8 +16,6 @@ class mainPollScreen extends StatefulWidget {
 }
 
 class _mainPollScreenState extends State<mainPollScreen> {
-  // int id = 1;
-  // String VotingOption = "";
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   List<Polls> pollsList = List<Polls>();
   bool isLoading = false;
@@ -87,11 +85,12 @@ class _mainPollScreenState extends State<mainPollScreen> {
                                       left: 12, right: 12),
                                   child: GestureDetector(onTap: (){
 
-                                   // stopVotingAgain(pollsList[index].pollsId,);
+                                   // stopVotingAgain(pollsList[index].pollsId,pollsList[index]);
                                     Route route = CupertinoPageRoute(builder: (context) =>PollsGiven(
-                                     polls : pollsList[index],
+                                      polls : pollsList[index],
                                     ));
                                     Navigator.push(context, route).then(onGoBack);
+
                                   },
                                   child:  Card(
                                       elevation: 10,
@@ -250,6 +249,8 @@ class _mainPollScreenState extends State<mainPollScreen> {
           .document(global.mainId)
           .collection("Polls")
           .where("enable", isEqualTo: true)
+         // .where("startDate",isGreaterThanOrEqualTo: DateFormat(global.dateFormat).parse(DateTime.now().toString()),)
+
           .limit(documentLimit)
           .getDocuments();
     } else {
@@ -260,6 +261,8 @@ class _mainPollScreenState extends State<mainPollScreen> {
           .collection("Polls")
           .startAfterDocument(_lastDocument)
           .where("enable", isEqualTo: true)
+          //.where("startDate",isGreaterThanOrEqualTo: DateFormat(global.dateFormat).parse(DateTime.now().toString()),)
+
           .limit(documentLimit)
           .getDocuments();
     }
@@ -300,6 +303,9 @@ class _mainPollScreenState extends State<mainPollScreen> {
         .document(global.parentId)
         .setData({"VoteAns": options});
   }
+
+
+
 
   // Future<void> _showDialog(
   //   var pollOptions,
@@ -365,37 +371,29 @@ class _mainPollScreenState extends State<mainPollScreen> {
   //   );
   // }
 
-  // stopVotingAgain(var pollsID, ) {
-  //
-  //
-  //   Firestore.instance
-  //       .collection("Society")
-  //       .document(global.mainId)
-  //       .collection("Polls")
-  //       .document(pollsID.toString())
-  //       .collection("ResidentPolls")
-  //      // .document(global.parentId)
-  //       .get(source: Source.server ).then((value) {
-  //         value.data.forEach((key, value) {
-  //           print(value);
-  //           if (value == null) {
-  //
-  //                   showScaffold("Thanks for Voting");
-  //                 } else {
-  //                   showScaffold("You Cant't vote again ");
-  //                 }
-  //         });
-  //   });
-  //       // .then((value) => value.documents.forEach((element) {
-  //       //       print(element["VoteAns"]);
-  //       //       // if (element['VoteAns'] == null) {
-  //       //       //   voting(pollsID, pollOptions);
-  //       //       //   showScaffold("Thanks for Voting");
-  //       //       // } else {
-  //       //       //   showScaffold("You Cant't vote again ");
-  //       //       // }
-  //       //     }));
-  // }
+  stopVotingAgain(var pollsID, var index ) {
+
+
+    Firestore.instance
+        .collection("Society")
+        .document(global.mainId)
+        .collection("Polls")
+        .document(pollsID.toString())
+        .collection("ResidentPolls")
+        .document(global.parentId)
+        .get(source: Source.server ).then((value) {
+         if(value.data['VoteAns'] == null){
+
+
+         }else {
+           showScaffold("You Can't vote again");
+         }
+
+
+
+    });
+
+  }
 
   Widget _floatingButton() {
     if (global.appType == "Residents") {

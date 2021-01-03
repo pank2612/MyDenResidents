@@ -9,13 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:residents/Bloc/AuthBloc.dart';
 import 'dart:collection';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/constantTextField.dart';
 import 'package:residents/Constant/tokenGenerate.dart';
 import 'package:residents/ModelClass/MaidModel.dart';
+import 'package:residents/ModelClass/UserModel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
+import 'package:flutter_bloc/flutter_bloc.dart';
 class AddAllLocalService extends StatefulWidget {
   final serviceName;
 
@@ -26,6 +29,7 @@ class AddAllLocalService extends StatefulWidget {
 
 class _AddAllLocalServiceState extends State<AddAllLocalService> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  UserData _userData = UserData();
 
   void showScaffold(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -42,6 +46,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
 
   @override
   void initState(){
+    _userData = context.bloc<AuthBloc>().getCurrentUser();
     global.documentData.keys.forEach((element) => list.add(element));
     global.image = null;
 
@@ -76,7 +81,8 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
       documentType: _documentTypeController.text,
       enable: true,
       service: widget.serviceName,
-      password: _passwordController.text
+      password: _passwordController.text,
+        houseId: global.parentId
 
     );
     Firestore.instance
@@ -118,6 +124,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                 documentType: _documentTypeController.text,
                 enable: true,
                 service: widget.serviceName,
+                houseId: global.parentId,
               );
               Firestore.instance
                   .collection("LocalServices")
@@ -136,6 +143,8 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                     .setData(jsonDecode(jsonEncode(history.toJson())),merge: true)
                     .then((value) => setState(() {
                   _showDialog();
+                  addServiceToNotification();
+
                 }));
               });
             });
@@ -144,9 +153,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
           setState(() {
             isLoading = false;
           });
-
         });
-
       }else{
         isLoading = false;
         showScaffold("Add " + widget.serviceName + " photo First");
@@ -454,6 +461,13 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
         );
       },
     );
+  }
+  
+  addServiceToNotification(){
+    Firestore.instance.collection(global.SOCIETY)
+        .document(global.mainId).collection("HouseDevices").document(_userData.uid).setData({
+      widget.serviceName:_documentNumber.text
+    },merge: true);
   }
 
 

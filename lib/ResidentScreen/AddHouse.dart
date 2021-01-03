@@ -25,7 +25,7 @@ class _AddHouseScreenState extends State<AddHouseScreen> {
 
   SaveActivation() async {
     ActivationCode activationCode = ActivationCode(
-        iD: global.uuid,
+        iD: global.parentId,
         type: "Residents",
         society: global.mainId,
         creationDate: DateTime.now(),

@@ -19,34 +19,37 @@ class Visitor {
   String deletName;
   String inviteBye;
   bool allDay;
+  bool inOut;
   bool accept;
 
   Visitor(
       {this.houseId,
         this.allDay,
-      this.name,
+        this.name,
+        this.inOut,
         this.accept,
-      this.mobileNumber,
-      this.societyId,
-      this.inviteDate,
-      this.visitorType,
-      this.firstInviteTime,
-      this.secondInviteTime,
-      this.enable,
-      this.visitorNumber,
-      this.ownerName,
-      this.ownerHouse,
-      this.ownerMobileNumber,
-      this.token,
+        this.mobileNumber,
+        this.societyId,
+        this.inviteDate,
+        this.visitorType,
+        this.firstInviteTime,
+        this.secondInviteTime,
+        this.enable,
+        this.visitorNumber,
+        this.ownerName,
+        this.ownerHouse,
+        this.ownerMobileNumber,
+        this.token,
         this.inviteBye,
         this.deletName,
-      this.id});
+        this.id});
 
   Visitor.fromJson(Map<String, dynamic> json)
       : houseId = json['houseId'],
         name = json['name'],
         allDay = json['allDay'],
         id = json['id'],
+        inOut = json['inOut'],
         accept = json['accept'],
         inviteBye = json['inviteBye'],
         secondInviteTime = json['secondInviteTime'],
@@ -64,24 +67,25 @@ class Visitor {
         ownerHouse = json['ownerHouse'];
 
   Map<String, dynamic> toJson() => {
-        'houseId': houseId,
-        'token': token,
-        'allDay':allDay,
-        'accept':accept,
-        'deletName':deletName,
-        'secondInviteTime': secondInviteTime,
-        'firstInviteTime': firstInviteTime,
-        'id': id,
-        'inviteBye':inviteBye,
-        'name': name,
-        'societyId': societyId,
-        'ownerMobileNumber': ownerMobileNumber,
-        'ownerHouse': ownerHouse,
-        'ownerName': ownerName,
-        'mobileNumber': mobileNumber,
-        'inviteDate': inviteDate.toIso8601String(),
-        'visitorType': visitorType,
-        'visitorNumber': visitorNumber,
-        'enable': enable
-      };
+    'houseId': houseId,
+    'token': token,
+    'allDay':allDay,
+    'inOut':inOut,
+    'accept':accept,
+    'deletName':deletName,
+    'secondInviteTime': secondInviteTime,
+    'firstInviteTime': firstInviteTime,
+    'id': id,
+    'inviteBye':inviteBye,
+    'name': name,
+    'societyId': societyId,
+    'ownerMobileNumber': ownerMobileNumber,
+    'ownerHouse': ownerHouse,
+    'ownerName': ownerName,
+    'mobileNumber': mobileNumber,
+    'inviteDate': inviteDate.toIso8601String(),
+    'visitorType': visitorType,
+    'visitorNumber': visitorNumber,
+    'enable': enable
+  };
 }

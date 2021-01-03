@@ -51,6 +51,9 @@ dependencies:
   pin_code_fields: ^5.0.0
   firebase_messaging: ^6.0.9
   http: ^0.12.2
+  dio: ^3.0.10
+  get_it: ^4.0.2
+  flutter_local_notifications: ^3.0.2
 
 dev_dependencies:
   flutter_test:

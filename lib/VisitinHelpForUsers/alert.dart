@@ -1,12 +1,20 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/ModelClass/AlertsModel.dart';
+import 'package:residents/ModelClass/UserModel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../notification.dart';
+
+
 class AlertsForUsers extends StatefulWidget {
   @override
   _AlertsState createState() => _AlertsState();
@@ -14,6 +22,9 @@ class AlertsForUsers extends StatefulWidget {
 
 class _AlertsState extends State<AlertsForUsers> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  UserData _userData = UserData();
+
+
 
   final formKey = GlobalKey<FormState>();
   void showScaffold(String message) {
@@ -27,6 +38,19 @@ class _AlertsState extends State<AlertsForUsers> {
   bool isCheckedadmin = false;
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _alertController = TextEditingController();
+
+
+  @override
+  void initState() {
+    super.initState();
+    _userData = context.bloc<AuthBloc>().getCurrentUser();
+  }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,12 +272,107 @@ class _AlertsState extends State<AlertsForUsers> {
         isLoading = false;
       });
       showScaffold(" Alert message Send Successfully");
+      if(isCheckedHouse == true && isCheckedadmin == true){
+        senNotificationToResidents();
+        senNotificationToRWA();
+        senNotificationToGuard();
+      } else if (isCheckedadmin == true){
+        senNotificationToRWA();
+        senNotificationToGuard();
+      } else {
+        senNotificationToResidents();
+      }
     }).catchError((err) {
       setState(() {
         isLoading = false;
       });
       Fluttertoast.showToast(msg: err.toString());
     });
+  }
+
+
+  sendNotificationto(){
+    Firestore.instance
+        .collection("users")
+        .getDocuments().then((value) {
+          value.documents.forEach((element) {
+            sendNotification(element['token'], _alertController.text);
+
+          });
+    });
+  }
+
+  senNotificationToRWA(){
+    Firestore.instance.collection("Society").document(global.mainId).collection("RWA").getDocuments().then((value) {
+      value.documents.forEach((element) {
+        sendNotification(element["token"],  _alertController.text, );
+
+      });
+    });
+  }
+  senNotificationToResidents(){
+    Firestore.instance.collection("Society").document(global.mainId).collection("HouseDevices").getDocuments().then((value) {
+      value.documents.forEach((element) {
+        sendNotification(element["token"],  _alertController.text, );
+
+      });
+    });
+  }
+  senNotificationToGuard(){
+    Firestore.instance.collection("Society").document(global.mainId).collection("GuardDevices").getDocuments().then((value) {
+      value.documents.forEach((element) {
+        sendNotification(element["token"],  _alertController.text, );
+
+      });
+    });
+  }
+
+  static Future<void> sendNotification(receiver, msg,) async {
+    final postUrl = 'https://fcm.googleapis.com/fcm/send';
+
+
+    final data = {
+      "notification": {"body": "Please be Safe", "title": msg},
+      "priority": "high",
+      "data": {
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+        "id": "1",
+        "status": "done",
+        "screen":"_showDialog",
+        "name":"hhhhh"
+
+      },
+      "apns": {
+        "payload": {
+          "aps": {
+            "mutable-content": 1
+          }
+        },
+        "fcm_options": {
+          "image": "https://aubergestjacques.com/wp-content/uploads/2017/04/check-out-1.png"
+        }
+      },
+      "to": "$receiver"
+    };
+
+
+    final headers = {'content-type': 'application/json', 'Authorization': global.notificationKey};
+    BaseOptions options = new BaseOptions(
+      connectTimeout: 5000,
+      receiveTimeout: 3000,
+      headers: headers,
+    );
+
+    try {
+      final response = await Dio(options).post(postUrl, data: jsonEncode(data));
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(msg: 'Request Sent To HouseMember');
+      } else {
+        print('notification sending failed');
+      }
+    } catch (e) {
+      print('exception $e');
+    }
   }
 
 

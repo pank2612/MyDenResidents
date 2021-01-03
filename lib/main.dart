@@ -1,8 +1,13 @@
 
 
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:residents/MainScreen/MainScreen.dart';
 import 'package:residents/ResidentSignIn/SplashScreen.dart';
+import 'package:residents/VisitorsScreen/GetExpectedVisitors.dart';
 import 'Constant/globalsVariable.dart' as globals;
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
@@ -11,10 +16,10 @@ import 'package:residents/Bloc/ConnectivityBloc.dart';
 import 'package:residents/Bloc/MainBloc.dart';
 import 'package:residents/ResidentSignIn/signIn.dart';
 
-//test
+import 'Constant/tokenGenerate.dart';
 
-// testing111
 class SimpleBlocObserver extends BlocObserver {
+
   @override
   void onEvent(Bloc bloc, Object event) {
     print('bloc: ${bloc.runtimeType}, event: $event');
@@ -41,6 +46,7 @@ class SimpleBlocObserver extends BlocObserver {
 }
 
 void main() {
+print("appsatarted");
   WidgetsFlutterBinding.ensureInitialized();
   //BlocSupervisor().delegate = SimpleBlocDelegate();
   Bloc.observer = SimpleBlocObserver();
@@ -68,16 +74,109 @@ class MyApp extends StatefulWidget {
 
 
 class _MyAppState extends State<MyApp> {
+  final FirebaseMessaging _fcm = FirebaseMessaging();
+  StreamSubscription iosSubscription;
+ // final NavigationService _navigationService = locator<NavigationService>();
+
 
   @override
   void initState() {
-
+  final GlobalKey<NavigatorState> navigationkey = GlobalKey(debugLabel: "GetExpectedVisitors");
     globals.connectivityBloc = ConnectivityBloc();
     globals.connectivityBloc.onInitial();
-
     super.initState();
+    // if (Platform.isIOS) {
+    //   iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
+    //   });
+    //
+    //   _fcm.requestNotificationPermissions(IosNotificationSettings());
+    // }
+    // _fcm.configure(
+    //   onMessage: (Map<String, dynamic> message) async {
+    //     print("onMessage: $message");
+    //     messagehandle(message, navigationkey, context);
+    //
+    //   },
+    //   onLaunch: (Map<String, dynamic> message) async {
+    //     print("onLaunch: $message");
+    //     messagehandle(message, navigationkey, context);
+    //    // Navigator.push(context, MaterialPageRoute(builder: (context)=>GetExpectedVisitors()));
+    //
+    //   },
+    //   onResume: (Map<String, dynamic> message) async {
+    //     print("onResume: $message");
+    //
+    //     messagehandle(message, navigationkey, context);
+    //    // Navigator.push(context, MaterialPageRoute(builder: (context)=>GetExpectedVisitors()));
+    //
+    //   },
+    // );
+  }
+  void messagehandle(msg,navigationkey,context){
+    print(msg["data"]);
+    print("aaddd");
+    // switch (msg['data']['screen']){
+    //   case "screen":
+    //     Navigator.push(context, MaterialPageRoute(builder:
+    //         (context)=>GetExpectedVisitors()));
+    //     break;
+    // }
   }
 
+  showdialog(Map<String, dynamic> msg){
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Visitor Name",
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  Expanded(child: Text(msg['data']['name'],textAlign: TextAlign.right,))
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Invite On",
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  Text(msg['data']["name"]),
+                ],
+              ),
+
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Accept'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          FlatButton(
+            child: Text('Reject'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+  // void _serialiseAndNavigate(Map<String, dynamic> message) {
+  //   var notificationData = message['data'];
+  //   var view = notificationData['view'];
+  //
+  //   if (view != null) {
+  //     // Navigate to the create post view
+  //     if (view == 'create_post') {
+  //       _navigationService.navigateTo(CreatePostViewRoute);
+  //     }
+  //   }
   void setCustomeTheme(int index) {
     setState(() {
       globals.colorsIndex = index;

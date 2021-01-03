@@ -1,17 +1,26 @@
 
 
+import 'dart:async';
 import 'dart:io';
 
 
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:residents/ActivityScreen/MainActivityScreen.dart';
+import 'package:residents/AlertScreen/AlertMainScreen.dart';
 
 import 'package:residents/Constant/globalsVariable.dart' as global;
 import 'package:residents/Constant/Constant_Color.dart';
+import 'package:residents/EventsScreen/EventsMainScreen.dart';
+import 'package:residents/LocalService/LocalServiceScreen.dart';
+import 'package:residents/LocalService/ServiceDetails.dart';
 import 'package:residents/MainScreen/MainScreen.dart';
+import 'package:residents/NoticeScreen/NoticesScreen.dart';
 import 'package:residents/Settings/Settings.dart';
+import 'package:residents/VisitorsScreen/GetExpectedVisitors.dart';
+import 'package:residents/VisitorsScreen/VisitorsMainScreen.dart';
 
 import '../notification.dart';
 
@@ -30,6 +39,8 @@ class _BottomNavBarState extends State<TabBarScreen> {
   GlobalKey _bottomNavigationKey = GlobalKey();
   PageController pageController;
   final pages = [MainScreen(),Activity(),MainScreen(),PreapproveNotification(),notification()];
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  StreamSubscription iosSubscription;
 
 
 
@@ -37,26 +48,82 @@ class _BottomNavBarState extends State<TabBarScreen> {
 
   @override
   void initState() {
-    print("societyid ${global.mainId}");
 
-    // savelocalCode().toGetDate(societyId).then((value){
-    //   setState(() {
-    //     globals.societyId = value;
-    //
-    //     activationValue = value;
-    //   });
-    //
-    // }
-    // );
-//    print("hbjbvksdfbvksdf");
-    //print(globals.societyId);
-//    print(activationValue);
 
     super.initState();
     pageController = PageController();
+   // final GlobalKey<NavigatorState> navigationkey = GlobalKey(debugLabel: "_showDialog");
+    if (Platform.isIOS) {
+      iosSubscription = _firebaseMessaging.onIosSettingsRegistered.listen((data) {
+      });
+
+      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+    }
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        // messagehandle(message, navigationkey, context);
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: ListTile(
+              title: Text(message['notification']['title']),
+              subtitle: Text(message['notification']['body']),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Ok'),
+                onPressed: () {Navigator.of(context).pop();
+                }
+              ),
+            ],
+          ),
+        );
+
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        messagehandle(message,  context,);
+
+
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+
+        messagehandle(message, context,);
+        // Navigator.push(context, MaterialPageRoute(builder: (context)=>GetExpectedVisitors()));
+
+      },
+    );
   }
 
+  void messagehandle(msg,context,){
+    print(msg["data"]);
+    print("aaddd");
 
+    switch (msg['data']['screen']){
+      case "_showDialog":
+        Navigator.push(context, MaterialPageRoute(builder:
+            (context)=> Visitors()));
+        break;
+      case "FullDetails":
+        Navigator.push(context, MaterialPageRoute(builder:
+            (context)=> LocalService()));
+        break;
+      case "Events":
+        Navigator.push(context, MaterialPageRoute(builder:
+            (context)=> EventsScreen()));
+        break;
+      case "Notices":
+        Navigator.push(context, MaterialPageRoute(builder:
+            (context)=> NoticesScreen()));
+        break;
+      case "AlertsScreen":
+        Navigator.push(context, MaterialPageRoute(builder:
+            (context)=> newAlert()));
+        break;
+    }
+  }
   void onPageChanged(int page) {
     setState(() {
       _page = page;
@@ -245,5 +312,33 @@ class _BottomNavBarState extends State<TabBarScreen> {
         ),
 
       );
+  }
+  _showDialog()  {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text('AlertDialog Title'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  "Your  ",
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              child: Text('ok'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

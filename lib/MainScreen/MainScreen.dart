@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:residents/AlertScreen/AlertMainScreen.dart';
 import 'package:residents/AmenityScreen/AmenityMainScreen.dart';
+import 'package:residents/BillingScreen/Billing.dart';
 import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
+import 'package:residents/EventsScreen/EventsMainScreen.dart';
 import 'package:residents/GateScreen/GateMainScreen.dart';
 import 'package:residents/LocalService/LocalServiceScreen.dart';
 import 'package:residents/ModelClass/PollsModel.dart';
+import 'package:residents/NoticeScreen/NoticesScreen.dart';
 import 'package:residents/PollsScreen/MainPolllScreen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:residents/ResidentScreen/ResidentMainScreen.dart';
@@ -145,10 +148,6 @@ class _MainScreenState extends State<MainScreen> {
       "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcS56SSZe6mbCuAnwJE6HKwUrbfHZEF6vgr5fw&usqp=CAU"
     },
     {
-      'name': 'Vendors',
-      'image': "https://image.flaticon.com/icons/png/128/79/79565.png"
-    },
-    {
       'name': "Amenity",
       'image':
       "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSGQYakY1YcSEBpAdQe7tXM7-zq7IyHrctlTg&usqp=CAU"
@@ -157,6 +156,23 @@ class _MainScreenState extends State<MainScreen> {
       'name': "Visitor's Details",
       'image':
       "https://authorisedvisitor.com/img/visitors/people.png"
+    },
+    {
+      'name': 'Events',
+      'image':
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT8CG02pBIg0AeXTtnoI1yFa2QqDFpYzIw54g&usqp=CAU"
+    },
+    {
+      'name': "Notices",
+      'icon': Icons.wb_sunny,
+      'image':
+      "https://cdn.iconscout.com/icon/free/png-256/notice-assistance-1817331-1538201.png"
+    },
+    {
+      'name': "Billing",
+      'icon': Icons.wb_sunny,
+      'image':
+      "https://cdn.iconscout.com/icon/free/png-256/notice-assistance-1817331-1538201.png"
     },
 
 
@@ -187,15 +203,22 @@ class _MainScreenState extends State<MainScreen> {
     } else if (indexValue == 7) {
       Navigator.push(
           context, CupertinoPageRoute(builder: (context) => GatesScreen()));
-    } else if (indexValue == 8) {
-      Navigator.push(
-          context, CupertinoPageRoute(builder: (context) => VendorsScreen()));
-    } else if (indexValue == 9) {
+    }
+    else if (indexValue == 8) {
       Navigator.push(
           context, CupertinoPageRoute(builder: (context) => AmenityScreen()));
-    }else if (indexValue == 10) {
+    }else if (indexValue == 9) {
       Navigator.push(
           context, CupertinoPageRoute(builder: (context) => Visitors()));
+    }else if (indexValue == 10) {
+      Navigator.push(
+          context, CupertinoPageRoute(builder: (context) => EventsScreen()));
+    }else if (indexValue == 11) {
+      Navigator.push(
+          context, CupertinoPageRoute(builder: (context) => NoticesScreen()));
+    }else if (indexValue == 12) {
+      Navigator.push(
+          context, CupertinoPageRoute(builder: (context) => BillingMainScreen()));
     }
 
     else {

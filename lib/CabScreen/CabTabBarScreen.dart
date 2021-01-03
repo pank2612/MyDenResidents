@@ -11,15 +11,7 @@ import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/constantTextField.dart';
 import 'package:residents/Constant/globalsVariable.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
-import 'package:residents/ModelClass/AllowFrequently.dart';
-import 'package:residents/ModelClass/AllowOnceDelivery.dart';
-import 'package:residents/ModelClass/UserModel.dart';
-import 'package:residents/VisitorsScreen/try.dart';
-import 'package:residents/pre_approve_delivery/addAllowOnce.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:residents/pre_approve_delivery/addFrequently.dart';
 
-import 'AddAllowOnce.dart';
 
 
 

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/constantTextField.dart';
@@ -28,6 +30,9 @@ class _ActivationScreenState extends State<ActivationScreen> {
   TextEditingController _societyController = TextEditingController();
   UserData _userData = UserData();
   List<ActivationCode> activationCodelist = List<ActivationCode>();
+
+
+
 
 
   bool isLoading = false;
@@ -212,7 +217,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
         ),
       }, merge: true);
       saveFamilyMembers(element['iD']);
-      _tokenRegister();
+     // _tokenRegister();
     });
   }
 
@@ -222,6 +227,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
       enrolDate: DateTime.now(),
       deactivateDate: DateTime.now(),
       enable: true,
+      token: _userData.token
     );
      Firestore.instance
         .collection(globals.SOCIETY)
@@ -233,16 +239,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
         .setData(jsonDecode(jsonEncode(houseMember.toJson())));
   }
 
-  _tokenRegister(){
-    UserData _userData = UserData();
-    _userData = context.bloc<AuthBloc>().getCurrentUser();
-    _firebaseMessaging.getToken().then((token) {
-      Firestore.instance.collection("users").document(_userData.uid).setData({
-        "token": token
-      }, merge: true);
 
-      });
-    }
 
   }
 

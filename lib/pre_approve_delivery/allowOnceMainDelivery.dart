@@ -182,22 +182,22 @@ class _AllowOnceDeliveryState extends State<AllowOnceDelivery>
                                       SizedBox(
                                         height: 5,
                                       ),
-                                      Card(
-                                          color: Colors.grey,
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20)),
-                                          child: Padding(
-                                            padding: EdgeInsets.all(5),
-                                            child: Text(
-                                              "Received By " + _userData.name,
-                                              style: TextStyle(
-                                                  color: UniversalVariables
-                                                      .ScaffoldColor,
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 15),
-                                            ),
-                                          ))
+                                      // Card(
+                                      //     color: Colors.grey,
+                                      //     shape: RoundedRectangleBorder(
+                                      //         borderRadius:
+                                      //             BorderRadius.circular(20)),
+                                      //     child: Padding(
+                                      //       padding: EdgeInsets.all(5),
+                                      //       child: Text(
+                                      //         "Received By " + _userData.name,
+                                      //         style: TextStyle(
+                                      //             color: UniversalVariables
+                                      //                 .ScaffoldColor,
+                                      //             fontWeight: FontWeight.w800,
+                                      //             fontSize: 15),
+                                      //       ),
+                                      //     ))
                                     ],
                                   ),
                                 ],

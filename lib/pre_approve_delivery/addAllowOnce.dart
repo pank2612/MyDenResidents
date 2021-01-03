@@ -322,7 +322,7 @@ class _AddAllowOnceState extends State<AddAllowOnce> {
                                       constantTextField().InputField(
                                           "Enter Vechial no",
                                           "",
-                                          validationKey.companyName,
+                                          validationKey.vehical,
                                           _vehicalController,
                                           false,
                                           IconButton(

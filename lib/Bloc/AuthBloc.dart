@@ -1,11 +1,17 @@
+import 'dart:convert';
 import 'dart:core';
+
+import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-import 'package:bloc/bloc.dart';
+
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/material.dart';
+import 'package:residents/Constant/globalsVariable.dart';
 import 'package:residents/ModelClass/UserModel.dart';
+import 'package:residents/ResidentSignIn/activationScreen.dart';
+import 'package:residents/ResidentSignIn/emailVerification.dart';
 
 class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
 
@@ -19,8 +25,6 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
 
   Future<UserData> currentUser() async {
     var user = await _firebaseAuth.currentUser();
-
-//    print(user);
     return await _userFromFirebase(user);
   }
 
@@ -36,13 +40,14 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   Future<UserData> _userFromFirebase(FirebaseUser user) async {
     _userData = UserData();
     if (user != null) {
-
+      print('user exists');
+      print(user.isEmailVerified);
       _userData = await _getUserDatatoFirestore(user.uid);
       print(_userData.uid);
       _userData.emailVerified = user.isEmailVerified;
       return _userData;
     } else {
-
+      print('user dont exists');
       _userData = null;
       add(AuthBlocEvent.setUpdate);
       return _userData;
@@ -61,28 +66,29 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
     add(AuthBlocEvent.setUpdate);
   }
 
-  // Future<bool> _getFutureBool() {
-  //   return Future.delayed(Duration(milliseconds: 20000))
-  //       .then((onValue) => true);
-  // }
+  Future<bool> _getFutureBool() {
+    return Future.delayed(Duration(milliseconds: 20000))
+        .then((onValue) => true);
+  }
 
   Future<UserData> createUserWithEmailAndPassword(
       String email, String password, context) async {
     final authResult = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, password: password);
     FirebaseUser user = authResult.user;
-
+    print("userID ${user.uid}");
     _saveUserDatatoFirestore(authResult);
     add(AuthBlocEvent.setUpdate);
-
+    print(
+        'EmailVerified    ${user.toString() + user.isEmailVerified.toString() + user.email.toString()}');
     await user.sendEmailVerification();
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => EmailVerification(
-    //     ),
-    //   ),
-    // );
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EmailVerification(
+        ),
+      ),
+    );
 
   }
 
@@ -93,12 +99,12 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
     final FirebaseAuth _auth = FirebaseAuth.instance;
     final current =   await _auth.currentUser();
     try {
-
+      print("click");
       if(current.isEmailVerified){
+        print("Emailid verify");
 
-
-        // Navigator.pushReplacement(context,
-        //     MaterialPageRoute(builder: (context) => ActivationScreen()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => ActivationScreen()));
       }else{
         print("Email id is not verified");
 
@@ -139,8 +145,11 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
         );
 
         _saveUserDatatoFirestore(authResult);
-        //_userFromFirebase(authResult.user);
+        _userData =  await _userFromFirebase(authResult.user);
+        print(jsonEncode(_userData));
+        print("aaaa");
         add(AuthBlocEvent.setUpdate);
+        return _userData;
       } else {
         throw PlatformException(
           code: 'ERROR_MISSING_GOOGLE_AUTH_TOKEN',
@@ -195,7 +204,7 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   }
 
   Future<UserData> _getUserDatatoFirestore(String uid) async {
-    var path = "users";
+    var path = USERS;
     var documentReference = _firestore.collection(path).document(uid);
 
     DocumentSnapshot documentSnapshot =
@@ -223,10 +232,12 @@ class AuthBloc extends Bloc<AuthBlocEvent, AuthBlocState> {
   }
 
   Future<void> _saveUserDatatoFirestore(AuthResult result) async {
-    var path = "users";
+    var path = USERS;
     var documentReference =
     _firestore.collection(path).document(result.user.uid);
     _userData = getGoogleAttributes(result);
+    print(_userData);
+    print("AuthBlock");
 //    globals.userdata = _userData;
     await documentReference.setData(_userData.toJson(),merge: true);
   }
