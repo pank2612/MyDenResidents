@@ -7,8 +7,6 @@ class Alerts {
   String type;
   bool securityAdmin;
   bool houseMember;
-
-
   Alerts({this.alertsId, this.alertsHeading,this.description, this.startDate,
     this.type, this.enable,this.securityAdmin,this.houseMember});
 

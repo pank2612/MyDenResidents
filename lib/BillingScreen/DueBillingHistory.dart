@@ -7,16 +7,18 @@ import 'package:residents/ModelClass/billing.dart';
 import 'package:residents/notification.dart';
 
 import 'DueBillingHistory.dart';
-import 'PaidBillTabBarScreen.dart';
-import 'PayBill.dart';
 
-class BillingMainScreen extends StatefulWidget {
+class BillingHistory extends StatefulWidget {
+  final billHead;
+
+  const BillingHistory({Key key, this.billHead}) : super(key: key);
   @override
   _BillingMainScreenState createState() => _BillingMainScreenState();
 }
 
-class _BillingMainScreenState extends State<BillingMainScreen> {
+class _BillingMainScreenState extends State<BillingHistory>  {
   List<BillingModel> billingList = List<BillingModel>();
+
   bool isLoading = false;
   bool hasMore = true;
   int documentLimit = 5;
@@ -26,7 +28,7 @@ class _BillingMainScreenState extends State<BillingMainScreen> {
 
   @override
   void initState() {
-    getBillingDetails(lastDocument);
+    //getBillingDetails(lastDocument);
     super.initState();
   }
 
@@ -35,9 +37,6 @@ class _BillingMainScreenState extends State<BillingMainScreen> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Billing"),
-      ),
       body: Column(children: [
         SizedBox(
           height: 10,
@@ -53,37 +52,46 @@ class _BillingMainScreenState extends State<BillingMainScreen> {
                   padding: const EdgeInsets.only(left: 12, right: 12),
                   child: GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder:(context)=> PayBill (
-                          billingId: billingList[index].billingId,
-                        )));
 
                       },
                       child: Card(
-                        child:
+                        // width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                 Text(
+                                    billingList[index].billingHeader,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20,
+
+                                    ),overflow: TextOverflow.ellipsis,maxLines: 1,
+                                  ),
+                                        Text(
+                                     "Due Bill",
+                                     style: TextStyle(
+                                       fontWeight: FontWeight.w800,
+                                       fontSize: 20,
+                                       color: Colors.red[900]
+
+                                     ),overflow: TextOverflow.ellipsis,maxLines: 1,
+                                   )
+
+                              ]),
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(children: [
-                                    Container(
-                                      width: MediaQuery.of(context).size.width/2,
-                                      child: Text(
-                                        billingList[index].billingHeader,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 20,
-
-                                        ),overflow: TextOverflow.ellipsis,maxLines: 1,
-                                      ),
-                                    ),
-
-                                  ]),
-                                  SizedBox(height: 10,),
-                                  Row(children: [
                                     Text(
 
-                                          billingList[index].mode,
+                                      billingList[index].mode,
                                       style: TextStyle(
                                         fontSize: 15,
                                       ),
@@ -116,31 +124,25 @@ class _BillingMainScreenState extends State<BillingMainScreen> {
                                       fontSize: 15,
                                     ),
                                   ),
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                 children: [
-                                   Text(
-                                     "Valid UpTo - " +
-                                         billingList[index].validDays + " days",
-                                     style: TextStyle(
-                                       fontSize: 15,
-                                     ),
-                                   ),
-                                  RaisedButton(onPressed: (){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context)=> PaidBillTabBarscreen(
-                                      billHead:  billingList[index].billingHeader,
-                                    )));
+                                      Text(
+                                        "Valid UpTo - " +
+                                            billingList[index].validDays + " days",
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                      ),
 
-                                  },child: Text("Check History"),)
-                                 ],
-                               ),
+
                                   SizedBox(height: 10,),
                                 ],
                               ),
                             )
-
+                          ],
+                        ),
                       )
                   )
+
+
               );
             },
           ),
@@ -163,62 +165,5 @@ class _BillingMainScreenState extends State<BillingMainScreen> {
       ]),
     );
   }
-  getBillingDetails(DocumentSnapshot _lastDocument) async {
-    int documentLimit = 10;
-    if (!hasMore) {
 
-      return;
-    }
-    if (isLoading) {
-      return;
-    }
-    setState(() {
-      isLoading = true;
-    });
-
-    QuerySnapshot querySnapshot;
-    print('No More Data');
-    if (_lastDocument == null) {
-      billingList.clear();
-      querySnapshot = await Firestore.instance
-          .collection('Society')
-          .document(global.mainId)
-          .collection("Billing")
-          .where("enable",isEqualTo: true)
-          .limit(documentLimit)
-          .getDocuments();
-    } else {
-      print('No call data');
-      querySnapshot = await Firestore.instance
-          .collection('Society')
-          .document(global.mainId)
-          .collection("Billing")
-          .startAfterDocument(_lastDocument)
-          .where("enable",isEqualTo: true)
-          .limit(documentLimit)
-          .getDocuments();
-    }
-    print("Society data");
-
-    if (querySnapshot.documents.length < documentLimit) {
-      print("data finish");
-      hasMore = false;
-    }
-    if (querySnapshot.documents.length != 0) {
-      lastDocument =
-      querySnapshot.documents[querySnapshot.documents.length - 1];
-      print("final data");
-
-      setState(() {
-        querySnapshot.documents.forEach((element) {
-          var billing = BillingModel();
-          billing = BillingModel.fromJson(element.data);
-          billingList.add(billing);
-        });
-      });
-    }
-    setState(() {
-      isLoading = false;
-    });
-  }
 }

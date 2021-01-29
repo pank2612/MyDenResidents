@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -8,8 +10,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/Constant/constantTextField.dart';
-import 'package:residents/ModelClass/UserModel.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:residents/ModelClass/UserModel.dart';
 import 'package:residents/ResidentSignIn/TabBarScreen.dart';
 import 'package:residents/ResidentSignIn/accessListScreen.dart';
 import 'package:residents/ResidentSignIn/activationScreen.dart';
@@ -24,6 +27,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  UserData _userData = UserData();
 
   void showScaffold(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -65,15 +69,76 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Widget _submitButton(TextEditingController email,
-      TextEditingController password) {
+  Widget _submitButton(TextEditingController email, TextEditingController password) {
     return GestureDetector(
       onTap: () {
+
         if (formKey.currentState.validate()) {
           setState(() {
             isLoading = true;
           });
+          context.bloc<AuthBloc>().signInWithEmailAndPassword(_emailController.text, _passwordController.text,).then((value) {
+            _userData = context.bloc<AuthBloc>().getCurrentUser();
+            print ("qqqqqqqqqqqq${ _userData.accessList.length}");
+            if (_userData.accessList != null) {
+              if (_userData.accessList.length == 1) {
+                var socityId = _userData.accessList[0].id;
+              //  _getToken(socityId,_userData.uid);
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) {
+                      return TabBarScreen();
+                    }));
+              } else {
+                print("accesslist");
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) {
+                      return accessList();
+                    }));
+              }
+            } else {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) {
+                    return ActivationScreen();
+                  }
+                  ));
+            }
+
+
+
+
+          });
+          // _getUserData().then((fUser) {
+          //
+          //   if(fUser!=null) {
+          //     if(!fUser.emailVerified){
+          //       Navigator.pushReplacement(context,
+          //           MaterialPageRoute(builder: (context) => EmailVerification()));
+          //     }
+          //     else if( fUser.accessList != null && fUser.accessList.length == 1 ) {
+          //       global.societyId = fUser.accessList[0].id.toString();
+          //       Navigator.pushReplacement(
+          //           context, MaterialPageRoute(builder: (context) => TabBarScreen()));
+          //     }
+          //     else if ( fUser.accessList != null && fUser.accessList.length > 1){
+          //       Navigator.pushReplacement(
+          //           context, MaterialPageRoute(builder: (context) => accessList()));
+          //     }
+          //     else {
+          //       Navigator.pushReplacement(context,
+          //           MaterialPageRoute(builder: (context) => ActivationScreen()));
+          //     }
+          //   }
+          //   else {
+          //     print('Login Page');
+          //    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginPage()));
+          //   }
+          // }
+          // );
+
         }
+
+
+
       },
       child: Container(
         padding: new EdgeInsets.symmetric(vertical: 5.0),
@@ -470,10 +535,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void googleLogin() {
     context.bloc<AuthBloc>().signInWithGoogle().then((value) {
-
-
-
-
+      print(value.accessList.length);
+      print("aaaaaa-------");
       if (value.accessList != null) {
         if (value.accessList.length == 1) {
           var socityId = value.accessList[0].id;
@@ -524,6 +587,23 @@ class _LoginPageState extends State<LoginPage> {
        "houseId":parentId
     },merge: true);
   }
+
+  // _getToken(String societyId,String userId) {
+  //   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  //   _firebaseMessaging.getToken().then((token) {
+  //     RWAModel rwaModel = RWAModel(
+  //         RWAId: userId,
+  //         enable: true,
+  //         token:token);
+  //     Firestore.instance
+  //         .collection("Society")
+  //         .document(societyId)
+  //         .collection("RWA")
+  //         .document(userId)
+  //         .setData(jsonDecode(jsonEncode(rwaModel.toJson())), merge: true);
+  //     print(token);
+  //   });
+  // }
 
 }
 

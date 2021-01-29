@@ -38,7 +38,8 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(icon: Icon(Icons.clear), onPressed: (){
             context.bloc<AuthBloc>().signOut().then((value) =>
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyApp())));
-          })
+          }
+          )
         ],
         leading: IconButton(icon: Icon(Icons.dehaze), onPressed: (){
             Navigator.push(context, MaterialPageRoute(builder: (context)=> ActivationScreen()));

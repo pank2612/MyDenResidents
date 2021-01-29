@@ -131,14 +131,7 @@ class _emailVerificationState extends State<EmailVerification> {
                             showScaffold("First Verify Your email id");
                           } else{
                             showScaffold("Email id is verify");
-                            // Navigator.pushReplacement(context,
-                            //     MaterialPageRoute(builder: (context) => ActivationScreen()));
-
                           }
-
-
-                          //  context.bloc<AuthBloc>().checkEmailVerification(context);
-                          // // checkEmilVerifiedOrNot();
                         },
                         child: Text(
                           "Email Verified",
@@ -155,70 +148,5 @@ class _emailVerificationState extends State<EmailVerification> {
             )));
   }
 
-// void authenticateUser(FirebaseUser user) {
-//   databaseMethods.authenticateUser(user).then((isNewUser) {
-//     if (isNewUser) {
-//       print(user.displayName);
-//       print(user.email);
-//       Map userData = {
-//         "uid": user.uid,
-//         "email": user.email,
-//         "nickname": widget.name,
-//         "photoUrl": ""
-//       };
-//       databaseMethods.addDataAfterSignUp(userData).then((value) {
-//         Navigator.pushReplacement(context,
-//             MaterialPageRoute(builder: (context) {
-//           return ActivationScreen();
-//         }));
-//       });
-//     } else {
-//       Navigator.pushReplacement(context,
-//           MaterialPageRoute(builder: (context) {
-//         return TabBarScreen();
-//       }));
-//     }
-//   });
-// }
 
-// checkEmilVerifiedOrNot() async {
-//   await FirebaseAuth.instance.currentUser()..reload();
-//   final FirebaseUser user = await _userData.getCurrentUser();
-//   print(user);
-//   try {
-//     print("click");
-//     if(user.isEmailVerified){
-//       print("click2");
-//
-//       Navigator.pushReplacement(context,
-//           MaterialPageRoute(builder: (context) => ActivationScreen()));
-//     }else{
-//       showScaffold("First Verify Your email id");
-//     }
-//
-//   }catch(e){
-//     print(e.toString());
-//   }
-// }
-
-
-// var databaseMethods = "";
-//
-//   resendEmilVerification() async {
-//   // var user = _userData;
-//     //final FirebaseUser user = await databaseMethods.getCurrentUser();
-//     try{
-//       await user.sendEmailVerification();
-//       setState(() {
-//         isLoading = false;
-//       });
-//       Fluttertoast.showToast(msg: "New verifaction link is send to your mail",backgroundColor: UniversalVariables.background);
-//
-//     } catch(e){
-//       print(e);
-//       Fluttertoast.showToast(msg: e,backgroundColor: UniversalVariables.background);
-//
-//
-//     }
-//   }
 }

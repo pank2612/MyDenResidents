@@ -19,13 +19,11 @@ import 'package:residents/LocalService/ServiceDetails.dart';
 import 'package:residents/MainScreen/MainScreen.dart';
 import 'package:residents/NoticeScreen/NoticesScreen.dart';
 import 'package:residents/Settings/Settings.dart';
+import 'package:residents/UserProfileScreen/userProfile.dart';
 import 'package:residents/VisitorsScreen/GetExpectedVisitors.dart';
 import 'package:residents/VisitorsScreen/VisitorsMainScreen.dart';
 
-import '../notification.dart';
 
-
-//SharedPreferences prefs;
 class TabBarScreen extends StatefulWidget {
   final society;
 
@@ -38,7 +36,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
   int _page = 0;
   GlobalKey _bottomNavigationKey = GlobalKey();
   PageController pageController;
-  final pages = [MainScreen(),Activity(),MainScreen(),PreapproveNotification(),notification()];
+  final pages = [MainScreen(),Activity(),MainScreen(),PreapproveNotification(),UserProfile()];
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   StreamSubscription iosSubscription;
 
@@ -52,7 +50,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
 
     super.initState();
     pageController = PageController();
-   // final GlobalKey<NavigatorState> navigationkey = GlobalKey(debugLabel: "_showDialog");
+
     if (Platform.isIOS) {
       iosSubscription = _firebaseMessaging.onIosSettingsRegistered.listen((data) {
       });
@@ -62,7 +60,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        // messagehandle(message, navigationkey, context);
+
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -72,24 +70,22 @@ class _BottomNavBarState extends State<TabBarScreen> {
             ),
             actions: <Widget>[
               FlatButton(
-                child: Text('Ok'),
-                onPressed: () {Navigator.of(context).pop();
-                }
+                  child: Text('Ok'),
+                  onPressed: () {Navigator.of(context).pop();
+                  }
               ),
             ],
           ),
         );
-
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
+        print("print lllllllllllll${message['notification']}");
         messagehandle(message,  context,);
-
-
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
-
+        print("print lllllllllllll${message["data"]}");
         messagehandle(message, context,);
         // Navigator.push(context, MaterialPageRoute(builder: (context)=>GetExpectedVisitors()));
 
@@ -102,7 +98,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
     print("aaddd");
 
     switch (msg['data']['screen']){
-      case "_showDialog":
+      case "Visitors":
         Navigator.push(context, MaterialPageRoute(builder:
             (context)=> Visitors()));
         break;
@@ -124,6 +120,10 @@ class _BottomNavBarState extends State<TabBarScreen> {
         break;
     }
   }
+
+
+
+
   void onPageChanged(int page) {
     setState(() {
       _page = page;
@@ -254,7 +254,6 @@ class _BottomNavBarState extends State<TabBarScreen> {
           index: 0,
           height: 50.0,
           items: <Widget>[
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -299,7 +298,7 @@ class _BottomNavBarState extends State<TabBarScreen> {
           ],
           color: UniversalVariables.background,
           buttonBackgroundColor: UniversalVariables.background,
-          backgroundColor: UniversalVariables.ScaffoldColor,
+          backgroundColor: UniversalVariables.backgroundThree,
           animationCurve: Curves.easeInOut,
           animationDuration: Duration(milliseconds: 600),
           onTap: (index) {

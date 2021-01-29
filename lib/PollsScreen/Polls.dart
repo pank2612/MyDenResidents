@@ -16,12 +16,21 @@ class PollsGiven extends StatefulWidget {
 class _PollState extends State<PollsGiven> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   String selectedValue = "";
+  var options = "";
 
 
   void showScaffold(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text(message),
     ));
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    stopVotingAgain();
+
   }
 
 
@@ -53,7 +62,14 @@ class _PollState extends State<PollsGiven> {
                       children: [
                         RaisedButton(
                           onPressed: () {
-                           _showDialog(widget.polls.pollsId,);
+                            
+                            if(options == ""){
+                              voting(widget.polls.pollsId);
+                            }else{
+                              showScaffold("You already vote");
+                            }
+                           
+
                           },
                           child: Text(
                             "Submit",
@@ -119,10 +135,7 @@ class _PollState extends State<PollsGiven> {
   }
 
 
-  Future<void> _showDialog(
-      // var pollOptions,
-       var pollsId,
-      ) async {
+  Future<void> _showDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -159,9 +172,10 @@ class _PollState extends State<PollsGiven> {
                   side: BorderSide(color: UniversalVariables.ScaffoldColor)),
               child: Text('Yes'),
               onPressed: () {
-                voting(pollsId,);
+
                 Navigator.pop(context);
                 showScaffold('Thanks For Voting');
+
               },
             ),
           ],
@@ -178,7 +192,44 @@ class _PollState extends State<PollsGiven> {
         .document(pollsId.toString())
         .collection("ResidentPolls")
         .document(global.parentId)
-        .setData({"VoteAns": selectedValue});
+        .setData({"VoteAns": selectedValue,
+        "id":global.parentId
+
+
+    });_showDialog();
+  }
+
+
+
+  stopVotingAgain() {
+
+    Firestore.instance
+        .collection("Society")
+        .document(global.mainId)
+        .collection("Polls")
+        .document(widget.polls.pollsId)
+        .collection("ResidentPolls")
+        .where("id",isEqualTo: global.parentId)
+        .getDocuments().
+    then((value) {
+      print(value);
+      value.documents.forEach((element) {
+        print(element['VoteAns']);
+        options = element['VoteAns'];
+        setState(() {
+          selectedValue = element['VoteAns'];
+        });
+
+
+      });
+
+
+
+
+
+    });
+ 
+
   }
 
 }

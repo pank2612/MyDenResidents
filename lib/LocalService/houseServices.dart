@@ -228,7 +228,7 @@ class _HouseServicesState extends State<HouseServices> {
              .document(globals.mainId)
              .collection(widget.houseService)
             // .where("service", isEqualTo: widget.houseService)
-             .where("documentNumber", isEqualTo: value.documents[0]["Maid"])
+             .where("documentNumber", isEqualTo: value.documents[0][widget.houseService])
              .where('enable', isEqualTo: true)
             // .where("houseId",isEqualTo: globals.parentId)
              .getDocuments();

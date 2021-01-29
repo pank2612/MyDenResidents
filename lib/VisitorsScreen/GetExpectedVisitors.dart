@@ -349,6 +349,7 @@ class _VendorsScreenState extends State<GetExpectedVisitors> {
                                       // Divider(
                                        //   color: Colors.black,
                                       // ),
+                                      Text(visitorsList[index].token ?? ""),
 
                                       visitorsList[index].inviteBye == "Guard"
                                           ? Card(

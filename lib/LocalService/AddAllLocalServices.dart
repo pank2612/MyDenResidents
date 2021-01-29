@@ -19,10 +19,12 @@ import 'package:residents/ModelClass/UserModel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 class AddAllLocalService extends StatefulWidget {
   final serviceName;
 
   const AddAllLocalService({Key key, this.serviceName}) : super(key: key);
+
   @override
   _AddAllLocalServiceState createState() => _AddAllLocalServiceState();
 }
@@ -36,25 +38,20 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
       content: Text(message),
     ));
   }
- List<String> list = [];
+
+  List<String> list = [];
 
   bool isExpanded = false;
   var checkSelectedType = "";
 
-
-
-
   @override
-  void initState(){
+  void initState() {
     _userData = context.bloc<AuthBloc>().getCurrentUser();
     global.documentData.keys.forEach((element) => list.add(element));
     global.image = null;
 
     super.initState();
   }
-
-
-
 
   bool isLoading = false;
 
@@ -67,44 +64,37 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
   TextEditingController _documentNumber = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
-
-  AddDataToSociety(String photourl)  {
-
+  AddDataToSociety(String photourl) {
     AllService service = AllService(
-      name: _guardNameController.text,
-      mobileNumber: _guardMobileController.text,
-      otherMobileNumber: _guardOtherMobileController.text,
-      dutyTiming: _guardDutyTimingController.text,
-      startDate: DateTime.now(),
-      photoUrl: photourl,
-      documentNumber: _documentNumber.text,
-      documentType: _documentTypeController.text,
-      enable: true,
-      service: widget.serviceName,
-      password: _passwordController.text,
-        houseId: global.parentId
-
-    );
+        name: _guardNameController.text,
+        mobileNumber: _guardMobileController.text,
+        otherMobileNumber: _guardOtherMobileController.text,
+        dutyTiming: _guardDutyTimingController.text,
+        startDate: DateTime.now(),
+        photoUrl: photourl,
+        documentNumber: _documentNumber.text,
+        documentType: _documentTypeController.text,
+        enable: true,
+        service: widget.serviceName,
+        password: _passwordController.text,
+        houseId: global.parentId);
     Firestore.instance
         .collection('Society')
         .document(global.mainId)
-        .collection(widget.serviceName)
+        .collection('LocalServices')
         .document(_documentNumber.text)
-        .setData(jsonDecode(jsonEncode(service.toJson())),merge: true);
+        .setData(jsonDecode(jsonEncode(service.toJson())), merge: true);
   }
-
 
   SaveInformation() {
     if (global.formKey.currentState.validate()) {
       setState(() {
         isLoading = true;
-
       });
-      if(global.image != null){
-
-        String fileName = widget.serviceName +'/${DateTime.now()}.png';
+      if (global.image != null) {
+        String fileName = widget.serviceName + '/${DateTime.now()}.png';
         StorageReference reference =
-        FirebaseStorage.instance.ref().child(fileName);
+            FirebaseStorage.instance.ref().child(fileName);
         StorageUploadTask uploadTask = reference.putFile(global.image);
         StorageTaskSnapshot storageTaskSnapshot;
         uploadTask.onComplete.then((value) {
@@ -129,23 +119,33 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
               Firestore.instance
                   .collection("LocalServices")
                   .document(_documentNumber.text)
-                  .setData(jsonDecode(jsonEncode(service.toJson())),merge: true)
+                  .setData(jsonDecode(jsonEncode(service.toJson())),
+                      merge: true)
                   .then((data) {
                 History history = History(
                     Id: Uuid().v1(),
                     startDate: DateTime.now(),
-                    societyID:global.mainId);
+                    societyID: global.mainId);
                 Firestore.instance
                     .collection("LocalServices")
                     .document(_documentNumber.text)
                     .collection("records")
                     .document(history.Id)
-                    .setData(jsonDecode(jsonEncode(history.toJson())),merge: true)
+                    .setData(jsonDecode(jsonEncode(history.toJson())),
+                        merge: true)
                     .then((value) => setState(() {
-                  _showDialog();
-                  addServiceToNotification();
-
-                }));
+                          isLoading = false;
+                          _showDialog();
+                          addServiceToNotification();
+                          _guardCompanyController.clear();
+                          _guardNameController.clear();
+                          _guardMobileController.clear();
+                          _guardOtherMobileController.clear();
+                          _documentTypeController.clear();
+                          _guardDutyTimingController.clear();
+                          _documentNumber.clear();
+                          _passwordController.clear();
+                        }));
               });
             });
           }
@@ -154,12 +154,13 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
             isLoading = false;
           });
         });
-      }else{
+      } else {
         isLoading = false;
         showScaffold("Add " + widget.serviceName + " photo First");
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,7 +169,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
         backgroundColor: UniversalVariables.background,
         title: Text(widget.serviceName),
       ),
-      body:  Stack(children: [
+      body: Stack(children: [
         Padding(
           padding: const EdgeInsets.only(left: 7, right: 7),
           child: ListView(
@@ -185,14 +186,21 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                       Stack(
                         children: [
                           IgnorePointer(
-                            child: constantTextField().
-                            InputField("Select Document Type", "",
+                            child: constantTextField().InputField(
+                                "Select Document Type",
+                                "",
                                 validationKey.validDocumentType,
                                 _documentTypeController,
-                                false,IconButton(icon: Icon(Icons.arrow_back_ios),
-                                  onPressed: (){},),1,1,TextInputType.name,false),
+                                false,
+                                IconButton(
+                                  icon: Icon(Icons.arrow_back_ios),
+                                  onPressed: () {},
+                                ),
+                                1,
+                                1,
+                                TextInputType.name,
+                                false),
                           ),
-
                           Positioned(
                             right: 0,
                             child: Container(
@@ -202,7 +210,8 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                                 onSelected: (String val) {
                                   _documentTypeController.text = val;
                                   setState(() {
-                                    global.changeValidation = global.documentData[val];
+                                    global.changeValidation =
+                                        global.documentData[val];
                                   });
                                 },
                                 itemBuilder: (BuildContext context) {
@@ -210,8 +219,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                                       .map<PopupMenuItem<String>>((String val) {
                                     return new PopupMenuItem(
                                         child: new Text(val), value: val);
-                                  }
-                                  ).toList();
+                                  }).toList();
                                 },
                               ),
                             ),
@@ -221,9 +229,8 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                       SizedBox(
                         height: 10,
                       ),
-
                       constantTextField().InputField(
-                         widget.serviceName + " Document Number",
+                          widget.serviceName + " Document Number",
                           "",
                           global.changeValidation,
                           _documentNumber,
@@ -232,8 +239,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             icon: Icon(Icons.arrow_back_ios),
                             onPressed: () {},
                           ),
-                          1,1,
-                          TextInputType.name,false),
+                          1,
+                          1,
+                          TextInputType.name,
+                          false),
                       SizedBox(
                         height: 10,
                       ),
@@ -247,8 +256,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             icon: Icon(Icons.arrow_back_ios),
                             onPressed: () {},
                           ),
-                          1,1,
-                          TextInputType.name,false),
+                          1,
+                          1,
+                          TextInputType.name,
+                          false),
                       SizedBox(
                         height: 10,
                       ),
@@ -262,8 +273,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             icon: Icon(Icons.arrow_back_ios),
                             onPressed: () {},
                           ),
-                          1,1,
-                          TextInputType.name,false),
+                          1,
+                          1,
+                          TextInputType.name,
+                          false),
                       SizedBox(
                         height: 10,
                       ),
@@ -277,8 +290,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             icon: Icon(Icons.arrow_back_ios),
                             onPressed: () {},
                           ),
-                          1,1,
-                          TextInputType.number,false),
+                          1,
+                          1,
+                          TextInputType.number,
+                          false),
                       SizedBox(
                         height: 10,
                       ),
@@ -292,8 +307,10 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             icon: Icon(Icons.arrow_back_ios),
                             onPressed: () {},
                           ),
-                          1,1,
-                          TextInputType.number,false),
+                          1,
+                          1,
+                          TextInputType.number,
+                          false),
                       SizedBox(
                         height: 10,
                       ),
@@ -308,16 +325,16 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                             ),
                             child: global.image != null
                                 ? ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                global.image.path,
-                                fit: BoxFit.cover,
-                              ),
-                            )
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Image.asset(
+                                      global.image.path,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
                                 : Icon(
-                              Icons.person,
-                              size: 90,
-                            ),
+                                    Icons.person,
+                                    size: 90,
+                                  ),
                           ),
                           Spacer(),
                           Card(
@@ -347,18 +364,19 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                       InkWell(
                           onTap: () {
                             showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay(
-                                    hour: DateTime.now().hour,
-                                    minute: DateTime.now().minute)).then((TimeOfDay value ) {
-
-                              if(value != null){
-                                _guardDutyTimingController.text = value.format(context);
+                                    context: context,
+                                    initialTime: TimeOfDay(
+                                        hour: DateTime.now().hour,
+                                        minute: DateTime.now().minute))
+                                .then((TimeOfDay value) {
+                              if (value != null) {
+                                _guardDutyTimingController.text =
+                                    value.format(context);
                               }
                             });
                           },
-                          child:IgnorePointer(
-                            child:  constantTextField().InputField(
+                          child: IgnorePointer(
+                            child: constantTextField().InputField(
                                 "Duty Timing",
                                 "6:00 am to 9:00 am ",
                                 validationKey.time,
@@ -367,20 +385,24 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                                 IconButton(
                                   icon: Icon(Icons.access_time),
                                 ),
-                                1,1,TextInputType.emailAddress,false),
-                          )
-                      ),
+                                1,
+                                1,
+                                TextInputType.emailAddress,
+                                false),
+                          )),
                       SizedBox(
                         height: 10,
                       ),
                       GestureDetector(
                         onTap: () {
-
                           int min = 1000;
                           int max = 9999;
                           var randomizer = new Random();
                           var rNum = min + randomizer.nextInt(max - min);
-                          _passwordController.text = rNum.toString();
+                          setState(() {
+                            _passwordController.text = rNum.toString();
+                          });
+
 
                           SaveInformation();
                         },
@@ -414,16 +436,17 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
         Positioned(
           child: isLoading
               ? Container(
-            color: Colors.transparent,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
+                  color: Colors.transparent,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               : Container(),
         ),
       ]),
     );
   }
+
   Future<void> _choosePhotoFrom() async {
     return showDialog<void>(
       context: context,
@@ -435,18 +458,20 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
             child: ListBody(
               children: <Widget>[
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     chooseFileFromCamera();
                     Navigator.pop(context);
                   },
-                  child:  Text(
+                  child: Text(
                     "Camera",
                     style: TextStyle(color: UniversalVariables.background),
                   ),
                 ),
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     chooseFile();
                     Navigator.pop(context);
                   },
@@ -462,18 +487,20 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
       },
     );
   }
-  
-  addServiceToNotification(){
-    Firestore.instance.collection(global.SOCIETY)
-        .document(global.mainId).collection("HouseDevices").document(_userData.uid).setData({
-      widget.serviceName:_documentNumber.text
-    },merge: true);
-  }
 
+  addServiceToNotification() {
+    Firestore.instance
+        .collection(global.SOCIETY)
+        .document(global.mainId)
+        .collection("HouseDevices")
+        .document(_userData.uid)
+        .setData({widget.serviceName: _documentNumber.text}, merge: true);
+  }
 
   Future chooseFileFromCamera() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: ImageSource.camera,imageQuality:global.imageQuelity );
+    final pickedFile = await picker.getImage(
+        source: ImageSource.camera, imageQuality: global.imageQuelity);
 
     setState(() {
       if (pickedFile != null) {
@@ -483,19 +510,17 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
       }
     });
   }
-  Future chooseFile() async {
-    await ImagePicker.pickImage(source: ImageSource.gallery,imageQuality: global.imageQuelity,
 
+  Future chooseFile() async {
+    await ImagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: global.imageQuelity,
     ).then((image) {
       setState(() {
         global.image = image;
       });
     });
   }
-
-
-
-
 
   Future<void> _showDialog() async {
     return showDialog<void>(
@@ -507,11 +532,14 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
             child: ListBody(
               children: <Widget>[
                 Text(
-                 widget.serviceName + " is Added ",
+                  widget.serviceName + " is Added ",
                   style: TextStyle(color: UniversalVariables.background),
                 ),
                 Text(
-                "Password of" + widget.serviceName + ": "+ _passwordController.text,
+                  "Password of" +
+                      widget.serviceName +
+                      ": " +
+                      _passwordController.text,
                   style: TextStyle(color: UniversalVariables.background),
                 )
               ],
@@ -527,10 +555,7 @@ class _AddAllLocalServiceState extends State<AddAllLocalService> {
                 },
                 child: Container(
                     color: UniversalVariables.background,
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width,
+                    width: MediaQuery.of(context).size.width,
                     child: Padding(
                       padding: EdgeInsets.all(5),
                       child: Icon(

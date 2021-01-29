@@ -1,16 +1,12 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
 import 'package:residents/ModelClass/AllowFrequently.dart';
-import 'package:residents/ModelClass/UserModel.dart';
 import 'package:residents/pre_approve_delivery/addFrequently.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 
 class AllowFrequentily extends StatefulWidget {
   @override

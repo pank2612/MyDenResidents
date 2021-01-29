@@ -1,157 +1,198 @@
-import 'dart:async';
-import 'dart:io';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class notification extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _MyAppState();
-  }
-}
+import 'package:paytm/paytm.dart';
+import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc/bloc.dart';
 
-class _MyAppState extends State<notification> {
-  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
-  final FirebaseMessaging _fcm = FirebaseMessaging();
+import 'Bloc/AuthBloc.dart';
+import 'Constant/globalsVariable.dart';
+import 'ModelClass/paytmModelClass.dart';
 
-  StreamSubscription iosSubscription;
+const String payment = "Payment";
+const String webStaging = "WEBSTAGING";
+const String currency = "INR";
+const mid = "lUvMfI35194252768557";
+const String custId = "cust01";
+const String callBackUrl =
+    "https://securegw-stage.paytm.in/theia/paytmCallback";
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    if (Platform.isIOS) {
-      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-      });
-
-      _fcm.requestNotificationPermissions(IosNotificationSettings());
-    }
-    // _fcm.configure(
-    //   onMessage: (Map<String, dynamic> message) async {
-    //     print("onMessage: $message");
-    //     print(message["notification"]);
-    //     showDialog(
-    //       context: context,
-    //       builder: (context) => AlertDialog(
-    //         content: SingleChildScrollView(
-    //           child: ListBody(
-    //             children: [
-    //               ListTile(
-    //                 title: Text(message['notification']['title']),
-    //                 subtitle: Text(message['notification']['body']),
-    //               ),
-    //               Row(children: [
-    //                 Text(" Visitors name"),
-    //                 Text(message['notification']['title'])
-    //               ],)
-    //             ],
-    //           ),
-    //         ),
-    //
-    //         actions: <Widget>[
-    //           FlatButton(
-    //             child: Text('Accept'),
-    //             onPressed: () => Navigator.of(context).pop(),
-    //           ),
-    //           FlatButton(
-    //             child: Text('Reject'),
-    //             onPressed: () => Navigator.of(context).pop(),
-    //           ),
-    //
-    //         ],
-    //       ),
-    //     );
-    //   },
-    //   onLaunch: (Map<String, dynamic> message) async {
-    //     print("onLaunch: $message");
-    //   },
-    //   onResume: (Map<String, dynamic> message) async {
-    //     print("onResume: $message");
-    //   },
-    //
-    // );
-  }
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              OutlineButton(
-                child: Text("Click"),
-                onPressed: () {
-
-                  sendNotification(key, "Your Visitor is on gate");
-                },
-              ),
-              // Text("Message: $message")
-            ]),
-      ),
-    );
-  }
-
-
-
-  static Future<void> sendNotification(receiver, msg) async {
-    final postUrl = 'https://fcm.googleapis.com/fcm/send';
-    final data = {
-      "notification": {
-        "body": "Accept Ride Request",
-        "title": "This is Ride Request",
-       // "data": {}
+final HttpsCallable callable = CloudFunctions.instance
+    .getHttpsCallable(functionName: 'payment')
+  ..timeout = const Duration(seconds: 30);
+var dateAndTime = DateTime.now();
+int amount = 10;
+var orderID = "81ndioen28dndw900";
+Future<bool> paytmFunction() async {
+  print("IN PAYTM FUNC");
+  try {
+    print("IN TRY");
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'orderId': "1234567DFGHJHBhjjhuj",
+        'amt': "10",
+        'custId': custId
       },
-      "to": "$token"
-    };
-
-    final headers = {'content-type': 'application/json', 'Authorization': key};
-    BaseOptions options = new BaseOptions(
-      connectTimeout: 5000,
-      receiveTimeout: 3000,
-      headers: headers,
     );
+    print('result');
+    print("ORDERID : $orderID");
+    print(result.data);
+    print(result.data['checksum']);
 
-    try {
-      final response = await Dio(options).post(postUrl, data: data);
-
-      if (response.statusCode == 200) {
-        Fluttertoast.showToast(msg: 'Request Sent To Driver');
-      } else {
-        print('notification sending failed');
-
+    var body = {
+      "requestType": payment,
+      "mid": mid,
+      "websiteName": webStaging,
+      "orderId": orderID.toString(),
+      "callbackUrl": callBackUrl,
+      "txnAmount": {
+        "value": amount.toString(),
+        "currency": currency,
+      },
+      "userInfo": {
+        "custId": custId,
       }
-    } catch (e) {
-      print('exception $e');
+    };
+    print(body);
+    var head = {"signature": result.data['checksum']};
+    print(head);
+
+    var post_data = {"body": body, "head": head};
+
+    print(post_data.toString());
+
+    var pp = jsonEncode(post_data);
+    var url =
+        'https://securegw-stage.paytm.in/theia/api/v1/initiateTransaction?mid=lUvMfI35194252768557&orderId=' +
+            orderID.toString();
+    var response = await http.post(
+      url,
+      body: pp,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': pp.length.toString()
+      },
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    bool isValidToken = false;
+    String tokenString = '';
+    final tokenResponse = jsonDecode(response.body);
+    if (tokenResponse['body']['resultInfo']['resultStatus'] == 'S') {
+      tokenString = tokenResponse['body']['txnToken'];
+      isValidToken = true;
+      print("token details");
+      print(isValidToken);
+      print(tokenString);
+      var paytmResponse;
+      paytmResponse = await Paytm.payWithPaytm(
+          mid,
+          orderID.toString(),
+          tokenString,
+          amount.toString(),
+          callBackUrl + "?ORDER_ID=" + orderID.toString(),
+          true);
+      print("Paytm Response ------- ${paytmResponse}");
+      if (paytmResponse['RESPCODE'] == "01") {
+        print("Paytm Response Code------- ${paytmResponse['RESPCODE']}");
+        PaytmModel paytmModel = PaytmModel(
+            GATEWAYNAME: paytmResponse['GATEWAYNAME'],
+            TXNID: paytmResponse['TXNID'],
+            BANKNAME: paytmResponse['BANKNAME'],
+            BANKTXNID: paytmResponse['BANKTXNID'],
+            CURRENCY: paytmResponse['CURRENCY'],
+            ORDERID: paytmResponse['ORDERID'],
+            PAYMENTMODE: paytmResponse['PAYMENTMODE'],
+            RESPCODE: paytmResponse['RESPCODE'],
+            RESPMSG: paytmResponse['RESPMSG'],
+            STATUS: paytmResponse['STATUS'],
+            TXNAMOUNT: paytmResponse['TXNAMOUNT'],
+            TXNDATE: paytmResponse['TXNDATE'],
+            //remark: remark,
+            paymentDateAndTime: dateAndTime.toString());
+        // print(
+        //     "Previous Balance ${context.bloc<AuthBloc>().state.userData.balance}");
+        print(
+            "Recent Added Balance ${double.parse((paytmResponse['TXNAMOUNT'])).toInt()}");
+        //int totalBalance = context.bloc<AuthBloc>().state.userData.balance +
+
+        //print("Total Balance ${totalBalance}");
+        // print("userID is ----- $userId");
+        // context.bloc<AuthBloc>().state.userData.balance +=
+        //     double.parse((paytmResponse['TXNAMOUNT'])).toInt();
+        //UserData userData = UserData(balance: totalBalance);
+        // Firestore.instance
+        //     .collection(USERS)
+        //     .document("yGOdMejwH3TfOMrWPCKVZwg6BnA3")
+        //     .setData(
+        //     {"balance": context.bloc<AuthBloc>().state.userData.balance},
+        //     merge: true);
+        // context
+        //     .bloc<AuthBloc>()
+        //     .updateUser(context.bloc<AuthBloc>().state.userData);
+
+        // Firestore.instance
+        //     .collection(USERS)
+        //     .document("yGOdMejwH3TfOMrWPCKVZwg6BnA3")
+        //     .collection(TRANSACTIONS)
+        //     .document(orderID.toString())
+        //     .setData(paytmModel.toJson(), merge: true);
+
+        await Fluttertoast.showToast(
+          msg: "Transaction successful",
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return true;
+      } else {
+        //if (paytmResponse['RESPCODE'] == " ") {
+        PaytmModel paytmModel = PaytmModel(
+            CURRENCY: paytmResponse['CURRENCY'],
+            RESPMSG: paytmResponse['RESPMSG'],
+            STATUS: paytmResponse['STATUS'],
+            ORDERID: paytmResponse['ORDERID'],
+            TXNAMOUNT: paytmResponse['TXNAMOUNT'],
+            paymentDateAndTime: dateAndTime.toString());
+        print("Paytm response MSG---------- ${paytmModel.RESPMSG}");
+        Firestore.instance
+            .collection(USERS)
+            .document("yGOdMejwH3TfOMrWPCKVZwg6BnA3")
+            .collection(TRANSACTIONS)
+            .document(orderID.toString())
+            .setData(paytmModel.toJson(), merge: true);
+        //}
+        await Fluttertoast.showToast(
+          msg: "Transaction Failed, Try again",
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+        return false;
+      }
     }
+  } on CloudFunctionsException catch (e) {
+    print('caught firebase functions exception');
+    print(e.code);
+    print(e.message);
+    print(e.details);
+
+    await Fluttertoast.showToast(
+        msg: "Transaction Failed",
+        textColor: Colors.white,
+        backgroundColor: Colors.black);
+    return false;
+  } catch (e) {
+    await Fluttertoast.showToast(
+        msg: "Transaction Failed, Try Again",
+        textColor: Colors.white,
+        backgroundColor: Colors.black);
+    print(e);
+    return false;
   }
-
-// static Future<String> getToken(userId)async{
-//
-//   final Firestore _db = Firestore.instance;
-//
-//   var token;
-//   await _db.collection('users')
-//       .document(userId)
-//       .collection('tokens').getDocuments().then((snapshot){
-//     snapshot.documents.forEach((doc){
-//       token = doc.documentID;
-//     });
-//   });
-//
-//   return token;
-//
-//
-// }
-
 }
-
-var key =
-    "key=AAAA7benEuU:APA91bE4pXVdtbXFYWyutC-cCxY76Gt30jDyR0og8iX8f6Jkbo0GLdc95kNusJrXjxPsVOvYsmaY4q7FbP2CH7lqWZtcUKJzUL5rA1oekx1WCo6IEoym4RcSELEt3y0LkiFciAQyvn3y";
-
-var token =
-    "ecdp0cPTTHmUL8sMAbAJ3y:APA91bG14spmr6PkNQVKbXqeJT1O1FTW5izehkwU6HUxyyrOUQHhoixHD-Ng8aOHlVd9HQ1A7gXU_3jnVh3ESTzVAusD7b1Ys_C_ApMhxe0OSM47aDjlldfg-5DIh-vijpxrAg7q6Tbv";

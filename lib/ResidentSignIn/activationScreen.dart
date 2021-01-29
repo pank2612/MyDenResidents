@@ -31,10 +31,6 @@ class _ActivationScreenState extends State<ActivationScreen> {
   UserData _userData = UserData();
   List<ActivationCode> activationCodelist = List<ActivationCode>();
 
-
-
-
-
   bool isLoading = false;
 
   @override
@@ -52,69 +48,65 @@ class _ActivationScreenState extends State<ActivationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height / 3,
-                    ),
-                    Text("Activated Code"),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Form(
-                        key: globals.formKey,
-                        child: Column(
-                          children: [
-                            constantTextField().InputField(
-                                "Enter Activation Code",
-                                "",
-                                validationKey.societyCode,
-                                _activationController,
-                                false,
-                                IconButton(
-                                    icon: Icon(Icons.remove_red_eye),
-                                    onPressed: () {}),
-                                1,
-                                1,
-                                TextInputType.emailAddress,
-                                false),
-                            SizedBox(
-                              height: 10,
-                            ),
-                          ],
-                        )),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    RaisedButton(
-                      onPressed: () {
-                        getActivationCode();
-                      },
-                      child: Text("Submit"),
-                    ),
-                  ],
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 3,
                 ),
-              ),
+                Text("Activated Code"),
+                SizedBox(
+                  height: 10,
+                ),
+                Form(
+                    key: globals.formKey,
+                    child: Column(
+                      children: [
+                        constantTextField().InputField(
+                            "Enter Activation Code",
+                            "",
+                            validationKey.societyCode,
+                            _activationController,
+                            false,
+                            IconButton(
+                                icon: Icon(Icons.remove_red_eye),
+                                onPressed: () {}),
+                            1,
+                            1,
+                            TextInputType.emailAddress,
+                            false),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    )),
+                SizedBox(
+                  height: 20,
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    getActivationCode();
+                  },
+                  child: Text("Submit"),
+                ),
+              ],
             ),
-            Positioned(
-              child: isLoading
-                  ? Container(
-                color: Colors.transparent,
-                child: Center(child: CircularProgressIndicator()),
-              )
-                  : Container(),
-            ),
-          ],
-        ));
+          ),
+        ),
+        Positioned(
+          child: isLoading
+              ? Container(
+                  color: Colors.transparent,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : Container(),
+        ),
+      ],
+    ));
   }
-
 
   Future<void> _showDialog() async {
     return showDialog<void>(
@@ -159,48 +151,54 @@ class _ActivationScreenState extends State<ActivationScreen> {
           .collection('ActivationCode')
           .where("tokenNo", isEqualTo: _activationController.text)
           .where("enable", isEqualTo: true)
-         // .where("type", isEqualTo: "Residents")
+          // .where("type", isEqualTo: "Residents")
           .getDocuments()
           .then((value) {
         print(value.documents.length);
 
-        value.documents.forEach((element) {
-          print(element["iD"]);
-        });
+      //  value.documents.forEach((element) {
+          if (value.documents.length == 1) {
+            print("hjgjvh");
+            setState(() {
+              globals.mainId = value.documents[0]["society"];
+              globals.parentId = value.documents[0]["iD"];
+              globals.flatNo = value.documents[0]["flatNo"];
+              savelocalCode().toSaveStringValue(
+                  residentHouseId, value.documents[0]["society"]);
+              savelocalCode()
+                  .toSaveStringValue(flatNoId, value.documents[0]["flatNo"]);
+              savelocalCode()
+                  .toSaveStringValue(residentId, value.documents[0]["iD"]);
+              isLoading = true;
+            });
+            saveAccesList(value);
+            disableSocietyId(value.documents[0]['iD']);
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => TabBarScreen()));
+          } else {
+            _showDialog();
+          }
 
-        if (value.documents.length == 1) {
-          setState(() {
-            globals.mainId = value.documents[0]["society"];
-            globals.parentId = value.documents[0]["iD"];
-            globals.flatNo = value.documents[0]["flatNo"];
-            savelocalCode().toSaveStringValue(
-                residentHouseId, value.documents[0]["society"]);
-            savelocalCode().toSaveStringValue(
-                flatNoId, value.documents[0]["flatNo"]);
-            savelocalCode()
-                .toSaveStringValue(residentId, value.documents[0]["iD"]);
-            isLoading = true;
-          });
-          saveAccesList(value);
-          disableSocietyId(value.documents[0]['iD']);
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => TabBarScreen()));
-        } else {
-          _showDialog();
-        }
+
+       //}):
       });
     }
   }
 
+
   disableSocietyId(String societyEnable) {
     Firestore.instance
         .collection('ActivationCode')
-        .document()
-        .updateData({"enable": false});
+        .document(societyEnable)
+        .setData({"enable": false},merge: true);
   }
-  saveAccesList(QuerySnapshot accessList,) {
+
+
+  saveAccesList(
+    QuerySnapshot accessList,
+  ) {
     accessList.documents.forEach((element) {
       Firestore.instance.collection("users").document(_userData.uid).setData({
         "accessList": FieldValue.arrayUnion(
@@ -216,20 +214,24 @@ class _ActivationScreenState extends State<ActivationScreen> {
           ],
         ),
       }, merge: true);
+      print(element['iD']);
+      print("ddddddd");
       saveFamilyMembers(element['iD']);
-     // _tokenRegister();
+      print(element['enableId']);
+      print("rrrrrrrr");
+      disableSocietyId(element['enableId'],);
+      // _tokenRegister();
     });
   }
 
-  saveFamilyMembers(String houseId)  {
+  saveFamilyMembers(String houseId) {
     HouseMember houseMember = HouseMember(
-      id: _userData.uid,
-      enrolDate: DateTime.now(),
-      deactivateDate: DateTime.now(),
-      enable: true,
-      token: _userData.token
-    );
-     Firestore.instance
+        id: _userData.uid,
+        enrolDate: DateTime.now(),
+        deactivateDate: DateTime.now(),
+        enable: true,
+        token: _userData.token);
+    Firestore.instance
         .collection(globals.SOCIETY)
         .document(globals.mainId)
         .collection(globals.HOUSES)
@@ -238,8 +240,4 @@ class _ActivationScreenState extends State<ActivationScreen> {
         .document(_userData.uid)
         .setData(jsonDecode(jsonEncode(houseMember.toJson())));
   }
-
-
-
-  }
-
+}

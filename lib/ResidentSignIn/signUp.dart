@@ -17,7 +17,7 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _userNameController = TextEditingController();
-  TextEditingController _controller = TextEditingController();
+
 
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -134,32 +134,6 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
 
-
-  void singUp()   {
-    //    if (formKey.currentState.validate()) {
-    //      setState(() {
-    //        _controller.text = "emailLogin";
-    //        isLoading = true;
-    //      });
-    //
-    //
-    //      databaseMethods.signUpWithEmail(
-    //          _emailController.text,
-    //          _passwordController.text,
-    //          _userNameController.text).then((FirebaseUser user) async {
-    //         print("something");
-    //         try{
-    //           await user.sendEmailVerification();
-    //           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmailVerification(
-    //             name: _userNameController.text,
-    //           )));
-    //           authenticateUser(user);
-    //         } catch(e){
-    //          print(e);
-    //         }
-    //      });
-    //    }
-  }
 
 
 
@@ -281,73 +255,13 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-
-
-
-
-  // Future<void> _showDialog() async {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false, // user must tap button!
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         // title: Text('AlertDialog Title'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //              Row(
-  //                mainAxisAlignment: MainAxisAlignment.center,
-  //                children: [
-  //
-  //                CircularProgressIndicator(
-  //
-  //                ),
-  //              ],),
-  //               Text(
-  //               "A link is send to your Email  id plz Click on it to verify",
-  //           style: TextStyle(color: UniversalVariables.background),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void emailSignUp(){
     if(formKey.currentState.validate()){
       setState(() {
         isLoading = true;
       });
-      context.bloc<AuthBloc>().createUserWithEmailAndPassword(_emailController.text, _passwordController.text, context)
-
-
-          .then((value) {
-        if(value.email == null){
-          // Navigator.pushReplacement(context,
-          //     MaterialPageRoute(builder: (context) {
-          //       return ActivationScreen();
-             // }));
-        } else{
-          // Navigator.pushReplacement(context,
-          //     MaterialPageRoute(builder: (context) {
-          //       return TabBarScreen();
-           //   }));
-
-        }
-      }
-
-
-
-
-      );
+      context.bloc<AuthBloc>().createUserWithEmailAndPassword(_emailController.text, _passwordController.text, context);
     }
   }
-
-
-
-
-
 
 }

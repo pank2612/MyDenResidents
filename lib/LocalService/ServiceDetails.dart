@@ -20,9 +20,9 @@ class FullDetails extends StatefulWidget {
   _FullDetailsState createState() => _FullDetailsState();
 }
 
-class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderStateMixin {
+class _FullDetailsState extends State<FullDetails>   {
   List<AllService> serviceList = List<AllService>();
-  TabController _tabController;
+
   bool showInsideService = false;
   bool changeSociety = false;
 
@@ -36,7 +36,7 @@ class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderSta
   void initState() {
 
     super.initState();
-    _tabController = new TabController(length: 2, vsync: this);
+
     getSocietyrServices(lastDocument);
   }
 
@@ -54,37 +54,12 @@ class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderSta
       appBar: AppBar(
         backgroundColor: UniversalVariables.background,
         title: Text(widget.serviceName),
-        bottom: TabBar(
-          unselectedLabelColor: Colors.white,
-          labelColor: Colors.amber,
-          tabs: [
-            Tab(
-              child: Text(
-                "Your " + widget.serviceName,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Tab(
-              child: Text(
-                "Society " + widget.serviceName,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-          ],
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorSize: TabBarIndicatorSize.tab,
-        ),
+
         bottomOpacity: 1,
       ),
-      body: TabBarView(
-        children: [HouseServices(houseService: widget.serviceName,), _society()],
-        controller: _tabController,
-      ),
+      body: _society(),
       floatingActionButton:
       widget.serviceName == "Vendors" ? Container():
-
-
       FloatingActionButton.extended(
         backgroundColor: UniversalVariables.background,
         onPressed: () {
@@ -115,7 +90,7 @@ class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderSta
       querySnapshot = await Firestore.instance
           .collection(globals.SOCIETY)
           .document(globals.mainId)
-           .collection(widget.serviceName)
+           .collection("LocalServices")
           .where("service", isEqualTo: widget.serviceName)
           .where('enable', isEqualTo: true)
           .limit(documentLimit)
@@ -124,7 +99,7 @@ class _FullDetailsState extends State<FullDetails>  with SingleTickerProviderSta
       querySnapshot = await Firestore.instance
           .collection(globals.SOCIETY)
           .document(globals.mainId)
-          .collection(widget.serviceName)
+          .collection("LocalServices")
           .where("service", isEqualTo: widget.serviceName)
           .where('enable', isEqualTo: true)
           .startAfterDocument(_lastDocument)
@@ -252,7 +227,7 @@ Widget _society(){
                                                 width: 5,
                                               ),
                                               Text(
-                                                serviceList[index].name,
+                                                serviceList[index].name??"",
                                                 style: TextStyle(
                                                     fontSize: 17,
                                                     fontWeight:

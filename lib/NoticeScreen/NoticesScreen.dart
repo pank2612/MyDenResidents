@@ -132,71 +132,99 @@ class _EventScreenState extends State<NoticesScreen> {
                               //  _showFullDetailsDialog(noticeList[index]);
                             },
                             child: Card(
-                              // width: MediaQuery.of(context).size.width,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)
+                              ),
                               child: ExpansionTile(
                                 title: Padding(
-                                  padding: const EdgeInsets.all(5.0),
+                                  padding: const EdgeInsets.all(0.0),
                                   child: Row(children: [
                                     Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 2,
+                                      width: MediaQuery.of(context).size.width/2,
                                       child: Text(
                                         noticeList[index].noticeHeading,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 20,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
+                                        ),overflow: TextOverflow.ellipsis,maxLines: 2,
                                       ),
                                     ),
+                                    Spacer(),
+                                    // GestureDetector(
+                                    //     onTap: () {
+                                    //       Route route = MaterialPageRoute(
+                                    //           builder: (context) =>
+                                    //               EditNoticeData(
+                                    //                   notice: noticeList[
+                                    //                   index]));
+                                    //       Navigator.push(context, route)
+                                    //           .then(onGoBack);
+                                    //     },
+                                    //     child: Icon(Icons.mode_edit)),
+                                    // SizedBox(
+                                    //   width: 5,
+                                    // ),
+                                    // GestureDetector(
+                                    //     onTap: () {
+                                    //       _showDeletDialog(
+                                    //           noticeList[index]);
+                                    //     },
+                                    //     child: Icon(Icons.delete)),
                                   ]),
                                 ),
                                 children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[300],
+                                        borderRadius: BorderRadius.only(
+                                            bottomRight: Radius.circular(20),
+                                            bottomLeft: Radius.circular(20)
+
+                                        )
+                                    ),
+                                    child:  Padding(
+                                      padding: const EdgeInsets.only(left: 15),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                              children:[ Text(
+                                                "Date - " +
+                                                    DateFormat(global.dateFormat)
+                                                        .format(noticeList[index]
+                                                        .startDate),
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                ),
+                                              ),]
+                                          ),
                                           Text(
-                                            "Date - " +
+                                            "endDate - " +
                                                 DateFormat(global.dateFormat)
                                                     .format(noticeList[index]
-                                                        .startDate),
+                                                    .endDate),
                                             style: TextStyle(
                                               fontSize: 15,
                                             ),
                                           ),
-                                        ]),
-                                        Text(
-                                          "endDate - " +
-                                              DateFormat(global.dateFormat)
-                                                  .format(noticeList[index]
-                                                      .endDate),
-                                          style: TextStyle(
-                                            fontSize: 15,
+                                          SizedBox(height: 10,),
+                                          Text(
+                                            noticeList[index].description,
+                                            style: TextStyle(
+                                                fontSize: 15,fontWeight: FontWeight.w800
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          noticeList[index].description,
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w800),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   )
                                 ],
                                 onExpansionChanged: (bool expanding) =>
                                     setState(
-                                        () => this.isExpanding = expanding),
+                                            () => this.isExpanding = expanding),
                               ),
-                            )),
+                            )
+                        ),
                       );
                     },
                   ),

@@ -84,12 +84,15 @@ class _mainPollScreenState extends State<mainPollScreen> {
                                   padding: const EdgeInsets.only(
                                       left: 12, right: 12),
                                   child: GestureDetector(onTap: (){
+                                    Route route = CupertinoPageRoute(builder: (context) =>PollsGiven(
+                                            polls : pollsList[index],
+                                          ));
+                                          Navigator.push(context, route).then(onGoBack);
 
                                    // stopVotingAgain(pollsList[index].pollsId,pollsList[index]);
-                                    Route route = CupertinoPageRoute(builder: (context) =>PollsGiven(
-                                      polls : pollsList[index],
-                                    ));
-                                    Navigator.push(context, route).then(onGoBack);
+
+                                   // stopVotingAgain(pollsList[index].pollsId,pollsList[index]);
+
 
                                   },
                                   child:  Card(
@@ -242,6 +245,7 @@ class _mainPollScreenState extends State<mainPollScreen> {
 
     QuerySnapshot querySnapshot;
     print('No More Data');
+    print( DateFormat("yyyy-MM-dd").parse(DateTime.now().toIso8601String()),);
     if (_lastDocument == null) {
       pollsList.clear();
       querySnapshot = await Firestore.instance
@@ -249,7 +253,7 @@ class _mainPollScreenState extends State<mainPollScreen> {
           .document(global.mainId)
           .collection("Polls")
           .where("enable", isEqualTo: true)
-         // .where("startDate",isGreaterThanOrEqualTo: DateFormat(global.dateFormat).parse(DateTime.now().toString()),)
+          .where("startDate",isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)).toIso8601String())
 
           .limit(documentLimit)
           .getDocuments();
@@ -261,7 +265,7 @@ class _mainPollScreenState extends State<mainPollScreen> {
           .collection("Polls")
           .startAfterDocument(_lastDocument)
           .where("enable", isEqualTo: true)
-          //.where("startDate",isGreaterThanOrEqualTo: DateFormat(global.dateFormat).parse(DateTime.now().toString()),)
+          .where("startDate",isGreaterThanOrEqualTo: DateTime.now().subtract(Duration(days: 1)).toIso8601String())
 
           .limit(documentLimit)
           .getDocuments();
@@ -292,108 +296,23 @@ class _mainPollScreenState extends State<mainPollScreen> {
     });
   }
 
-  voting(var pollsId, var options) {
-    print("call to voting function");
-    Firestore.instance
-        .collection("Society")
-        .document(global.mainId)
-        .collection("Polls")
-        .document(pollsId.toString())
-        .collection("ResidentPolls")
-        .document(global.parentId)
-        .setData({"VoteAns": options});
-  }
-
-
-
-
-  // Future<void> _showDialog(
-  //   var pollOptions,
-  //   var pollsId,
-  // ) async {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false, // user must tap button!
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Poll'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //               Text(
-  //                 pollOptions,
-  //                 style: TextStyle(color: UniversalVariables.background),
-  //               )
-  //             ],
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           RaisedButton(
-  //             elevation: 10,
-  //             color: UniversalVariables.background,
-  //             shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(18.0),
-  //                 side: BorderSide(color: UniversalVariables.ScaffoldColor)),
-  //             child: Text('No'),
-  //             onPressed: () {
-  //               Navigator.pop(context);
-  //             },
-  //           ),
-  //           RaisedButton(
-  //             elevation: 10,
-  //             color: UniversalVariables.background,
-  //             shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(18.0),
-  //                 side: BorderSide(color: UniversalVariables.ScaffoldColor)),
-  //             child: Text('Yes'),
-  //             onPressed: () {
-  //               stopVotingAgain(pollsId, pollOptions);
-  //               Navigator.pop(context);
-  //               //  voting(pollsId, pollOptions);
-  //
-  //               // if (stopVotingAgain(pollsId) != null) {
-  //               //
-  //               //   voting(pollsId, pollOptions);
-  //               //   showScaffold("Thanks for Voting");
-  //               //
-  //               //   Navigator.pop(context);
-  //               // } else {
-  //               //   Navigator.pop(context);
-  //               // print  (stopVotingAgain(pollsId));
-  //               //   voting(pollsId, pollOptions);
-  //               //   showScaffold("You Cant't vote again ");
-  //               // }
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
+  // voting(var pollsId, var options) {
+  //   print("call to voting function");
+  //   Firestore.instance
+  //       .collection("Society")
+  //       .document(global.mainId)
+  //       .collection("Polls")
+  //       .document(pollsId.toString())
+  //       .collection("ResidentPolls")
+  //       .document(global.parentId)
+  //       .setData({"VoteAns": options});
   // }
 
-  stopVotingAgain(var pollsID, var index ) {
-
-
-    Firestore.instance
-        .collection("Society")
-        .document(global.mainId)
-        .collection("Polls")
-        .document(pollsID.toString())
-        .collection("ResidentPolls")
-        .document(global.parentId)
-        .get(source: Source.server ).then((value) {
-         if(value.data['VoteAns'] == null){
-
-
-         }else {
-           showScaffold("You Can't vote again");
-         }
 
 
 
-    });
 
-  }
+
 
   Widget _floatingButton() {
     if (global.appType == "Residents") {

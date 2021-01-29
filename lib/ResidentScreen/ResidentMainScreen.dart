@@ -171,24 +171,28 @@ class _HousesScreenState extends State<HousesScreen> {
         .where("enable",isEqualTo: true)
         .getDocuments().then((value) {
           value.documents.forEach((element) async {
-            print(element['id']);
-            querySnapshot = await
-            Firestore.instance
-                .collection("users")
-                .where("id",isEqualTo: element['id'])
-                .getDocuments();
-            if (querySnapshot.documents.length != 0) {
-              lastDocument =
-              querySnapshot.documents[querySnapshot.documents.length - 1];
-              print("final data");
-              setState(() {
-                querySnapshot.documents.forEach((element) {
-                  var userData = UserData();
-                  userData = UserData.fromMap(element.data);
-                  userDataList.add(userData);
+            if(element['id'] != context.bloc<AuthBloc>().getCurrentUser().uid){
+              print(element['id']);
+              querySnapshot = await
+              Firestore.instance
+                  .collection("users")
+                  .where("id",isEqualTo: element['id'])
+                  .getDocuments();
+              if (querySnapshot.documents.length != 0) {
+                lastDocument =
+                querySnapshot.documents[querySnapshot.documents.length - 1];
+                print("final data");
+                setState(() {
+                  querySnapshot.documents.forEach((element) {
+                    var userData = UserData();
+                    userData = UserData.fromMap(element.data);
+                    userDataList.add(userData);
+                  });
                 });
-              });
+              }
+
             }
+
 
           }
           );

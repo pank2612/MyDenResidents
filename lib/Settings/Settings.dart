@@ -22,7 +22,9 @@ class _PreapproveNotificationState extends State<PreapproveNotification> {
       body: Padding(
         padding: EdgeInsets.all(0),
         child: StreamBuilder(
-            stream: Firestore.instance.collection('ServiceName').snapshots(),
+            stream: Firestore.instance.collection('ServiceName')
+
+                .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const Text('loading....');
               return ListView.builder(

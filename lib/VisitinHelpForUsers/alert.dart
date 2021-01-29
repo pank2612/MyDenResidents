@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:residents/Bloc/AuthBloc.dart';
 import 'package:residents/Constant/Constant_Color.dart';
@@ -92,6 +94,7 @@ class _AlertsState extends State<AlertsForUsers> {
                                   SizedBox(
                                     height: 2,
                                   ),
+                                 // Icon(_alertCategory[index]['icons']),
                                   Container(
                                     child: Image.network(
                                       _alertCategory[index]["image"],
@@ -215,26 +218,31 @@ class _AlertsState extends State<AlertsForUsers> {
   List<Map<String, dynamic>> _alertCategory = [
     {
       'name': 'Stuck in Lift',
+      //"icons": Icon(AntDesign.stepforward),
       'image':
       "https://cdn.iconscout.com/icon/premium/png-128-thumb/stuck-in-lift-1560887-1322669.png"
     },
     {
       'name': "Fire",
+      //"icons": Icon(AntDesign.stepforward),
       'image':
       "https://cdn.iconscout.com/icon/premium/png-256-thumb/fire-2096406-1767058.png"
     },
     {
       'name': 'Medical Emergency',
+     // "icons": Icon(AntDesign.stepforward),
       'image':
       "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSERIuXGm7xJfW4e6v3Neg9HzTNskr6C2d8jA&usqp=CAU"
     },
     {
       'name': "Visitors Threat",
+     // "icons": Icon(AntDesign.stepforward),
       'image':
       "https://cdn2.iconfinder.com/data/icons/insurance-type-coverage/278/insurance-claim-002-512.png"
     },
     {
       'name': 'Animal Threat',
+     // "icons": Icon(AntDesign.stepforward),
       'image':
       "https://www.grow-trees.com/images/Biodiversity%20Enhancement.png"
     },
@@ -290,6 +298,36 @@ class _AlertsState extends State<AlertsForUsers> {
     });
   }
 
+  void showNotificationWithActionButtons() async {
+
+    // if(!_notificationsAllowed){
+    //   await requestUserPermission();
+    // }
+    //
+    // if(!_notificationsAllowed){
+    //   return;
+    // }
+
+    // AwesomeNotifications().createNotification(
+    //     content: NotificationContent(
+    //       id: 3,
+    //       channelKey: 'basic_channel',
+    //       title: 'Anonymous says:',
+    //       body: 'Hi there!',
+    //       payload: {'uuid': 'user-profile-uuid'},
+    //     ),
+    //     actionButtons: [
+    //       NotificationActionButton(
+    //           key: 'READ', label: 'Accept', autoCancel: true),
+    //       NotificationActionButton(
+    //         key: 'PROFILE', label: 'Reject', autoCancel: true,)
+    //     ]
+    //
+    // );
+
+  }
+
+
 
   sendNotificationto(){
     Firestore.instance
@@ -331,17 +369,21 @@ class _AlertsState extends State<AlertsForUsers> {
     final postUrl = 'https://fcm.googleapis.com/fcm/send';
 
 
-    final data = {
+    final data =
+
+    {
       "notification": {"body": "Please be Safe", "title": msg},
       "priority": "high",
-      "data": {
-        "click_action": "FLUTTER_NOTIFICATION_CLICK",
-        "id": "1",
+      "data":{
+          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+         "id": "1",
         "status": "done",
-        "screen":"_showDialog",
+        "screen":"AlertsScreen",
         "name":"hhhhh"
 
-      },
+
+       },
+
       "apns": {
         "payload": {
           "aps": {
@@ -354,6 +396,8 @@ class _AlertsState extends State<AlertsForUsers> {
       },
       "to": "$receiver"
     };
+
+
 
 
     final headers = {'content-type': 'application/json', 'Authorization': global.notificationKey};

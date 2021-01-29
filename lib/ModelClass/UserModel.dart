@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:residents/Constant/globalsVariable.dart' as global;
 
@@ -14,18 +13,17 @@ class UserData {
   List<AccessList> accessList;
   bool emailVerified;
 
-  UserData({
-    this.uid,
-    this.name,
-    this.email,
-    this.phoneNo,
+  UserData(
+      {this.uid,
+      this.name,
+      this.email,
+      this.phoneNo,
+      this.gender,
+      this.token,
+      this.profilePhoto,
+      this.accessList,
+      this.emailVerified});
 
-    this.gender,
-    this.token,
-    this.profilePhoto,
-    this.accessList,
-    this.emailVerified
-  });
   Map toJson() {
     var data = Map<String, dynamic>();
     data['id'] = this.uid;
@@ -42,6 +40,7 @@ class UserData {
     // }
     return data;
   }
+
   UserData.fromMap(Map<String, dynamic> mapData) {
     this.uid = mapData['id'];
     this.name = mapData['nickname'];
@@ -51,30 +50,29 @@ class UserData {
     this.gender = mapData['gender'];
     this.token = mapData['token'];
     this.profilePhoto = mapData['photoUrl'];
-    if(mapData['accessList']!=null) {
+    if (mapData['accessList'] != null) {
       List<AccessList> mainAccessList = List<AccessList>();
       for (int i = 0; i < mapData['accessList'].length; i++) {
-     if(mapData['accessList'][i]['type'] == global.appType){
-        print(mapData['accessList'][i]['id']);
-        AccessList accessList = AccessList();
-        accessList.id = mapData['accessList'][i]['id'];
-        accessList.type = mapData['accessList'][i]['type'];
-        accessList.status = mapData['accessList'][i]["status"];
-        accessList.societyName = mapData['accessList'][i]['societyName'];
-        accessList.residentId = mapData['accessList'][i]['residentId'];
-        accessList.flatNo = mapData['accessList'][i]['flatNo'];
-        accessList.token = mapData['accessList'][i]['token'];
-        print(accessList);
-        mainAccessList.add(accessList);
-      }}
+        if (mapData['accessList'][i]['type'] == global.appType) {
+          print(mapData['accessList'][i]['id']);
+          AccessList accessList = AccessList();
+          accessList.id = mapData['accessList'][i]['id'];
+          accessList.type = mapData['accessList'][i]['type'];
+          accessList.status = mapData['accessList'][i]["status"];
+          accessList.societyName = mapData['accessList'][i]['societyName'];
+          accessList.residentId = mapData['accessList'][i]['residentId'];
+          accessList.flatNo = mapData['accessList'][i]['flatNo'];
+          accessList.token = mapData['accessList'][i]['token'];
+          print(accessList);
+          mainAccessList.add(accessList);
+        }
+      }
       this.accessList = mainAccessList;
     }
   }
 }
 
-
-class AccessList{
-
+class AccessList {
   String id;
   bool status;
   String type;
@@ -92,6 +90,7 @@ class AccessList{
     this.flatNo,
     this.token,
   });
+
   Map toMap(AccessList obj) {
     var data = Map<String, dynamic>();
     data['id'] = obj.id;
@@ -104,6 +103,7 @@ class AccessList{
 
     return data;
   }
+
   AccessList.fromMap(Map<String, dynamic> mapData) {
     this.id = mapData['id'];
     this.status = mapData['status'];
@@ -113,5 +113,5 @@ class AccessList{
     this.residentId = mapData['residentId'];
     this.token = mapData['token'];
   }
-
 }
+
